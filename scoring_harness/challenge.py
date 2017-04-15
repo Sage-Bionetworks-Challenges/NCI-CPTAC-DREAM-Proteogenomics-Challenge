@@ -198,8 +198,10 @@ def validate(evaluation, canCancel, dry_run=False):
             status.canCancel = True
         if not is_valid:
             failure_reason = {"FAILURE_REASON":validation_message}
-            add_annotations = synapseclient.annotations.to_submission_status_annotations(failure_reason,is_private=True)
-            status = update_single_submission_status(status, add_annotations)
+        else:
+            failure_reason = {"FAILURE_REASON":''}
+        add_annotations = synapseclient.annotations.to_submission_status_annotations(failure_reason,is_private=True)
+        status = update_single_submission_status(status, add_annotations)
 
         if not dry_run:
             status = syn.store(status)
