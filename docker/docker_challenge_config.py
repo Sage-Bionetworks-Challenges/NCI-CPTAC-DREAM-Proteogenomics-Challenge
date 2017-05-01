@@ -122,7 +122,7 @@ def dockerRun(submission, scoring_sh, syn, client):
 		volumes[vol] = {'bind': MOUNTED_VOLUMES[vol].split(":")[0], 'mode': MOUNTED_VOLUMES[vol].split(":")[1]}
 
 	# Run docker image
-	container = client.containers.run(dockerRepo, 'bash /score_sc1.sh', detach=True,volumes = volumes)
+	container = client.containers.run(dockerRepo, 'bash /score_sc1.sh', detach=True,volumes = volumes, network_disabled=True)
 	
 	#Create log file
 	LogFileName = submission.id + "_log.txt"
