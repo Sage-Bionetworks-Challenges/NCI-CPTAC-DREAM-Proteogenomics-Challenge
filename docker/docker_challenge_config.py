@@ -4,6 +4,7 @@ import subprocess
 from synapseclient import File
 import zipfile
 import os
+import base64
 
 #Synapse Id of Challenge
 CHALLENGE_SYN_ID = "syn1235"
@@ -41,7 +42,7 @@ config_evaluations = [
     },
     {
         'id':8720145,
-        'score_sh':'/score_sc2a.sh'
+        'score_sh':'/score_sc2.sh'
     },
     {
         'id':8720147,
@@ -60,13 +61,33 @@ config_evaluations = [
 
 config_evaluations_map = {ev['id']:ev for ev in config_evaluations}
 
+def getBearerTokenURL(dockerRequestURL)
+    initialReq = requests.get(dockerRequestURL)
+    auth_headers = initialReq.headers['Www-Authenticate'].split(",")
+    auth_headers = [i.split("=")[1].replace('"','') for i in auth_headers]
+    required = ['Bearer realm=','service=','scope=']
+    for head in auth_headers:
+        if head.startswith("Bearer realm="):
+            bearerRealm = head.split('Bearer realm=')[1]
+        elif head.startswith('service='):
+            service = head.split('service=')[1]
+        elif head.startswith('scope='):
+            scope = head.split('scope=')[1]
+    return("{0}?service={1}&scope={2}".format(bearerRealm,service,scope))
 
+def getAuthToken(dockerRequestURL):
+    bearerTokenURL = getBearerTokenURL(dockerRequestURL)
+    auth = base64.b64encode("user:pass")
+    bearerTokenRequest = requests.get(bearerTokenURL,
+        headers={'Authorization': 'Basic %s' % auth})
 
+    
 def zipdir(path, ziph):
 	# ziph is zipfile handle
 	for root, dirs, files in os.walk(path):
 		for file in files:
 			ziph.write(os.path.join(root, file),os.path.join(root, file).replace(path+"/",""))
+
 
 def dockerValidate(submission):
     submissionJson = json.loads(submission['entityBundleJSON'])
@@ -75,9 +96,22 @@ def dockerValidate(submission):
     #assert dockerRepo.startswith("docker.synapse.org")
     assert submission.get('dockerDigest') is not None, "Must submit a docker container with a docker sha digest"
     dockerDigest = submission['dockerDigest']
-    dockerImage = dockerRepo + "@" + dockerDigest
+    index_endpoint = 'https://docker.synapse.org'
+    #dockerImage = dockerRepo + "@" + dockerDigest
 
     #Check if docker is able to be pulled
+    dockerRequestURL = '{0}/v2/{1}/manifests/{2}'.format(index_endpoint, dockerRepo, dockerDigest)
+    token = getAuthToken(dockerRequestURL)
+
+
+
+
+
+resp = requests.get('{0}/v2/{1}/manifests/{2}'.format(index_endpoint, namespace, digest),
+                    #auth=tuple('KcedZZdIPMzhUwzbTKD2eqqRRq6FC6g33etz8dc0/3J8r4OijxYBPP79TPiX8qr1PbSrzj6/a/aKH333EKpGXg=='),
+                    headers={'Authorization': 'Bearer %s' %bearerTokenRequest.json()['token']})
+
+
     try:
         client.images.pull(dockerImage)
     except docker.errors.ImageNotFound as e:
@@ -87,8 +121,8 @@ def dockerValidate(submission):
     #should be stateless, if there needs to be code changes to the docker agent
 
     # must use os.system (Can't pipe with subprocess)
-    out = os.system('docker run -it --rm -e="CLI=true" %s [ -e %s ] || (echo "DoesNotExist" && exit 1)' % (dockerImage, scoring_sh))
-    assert out==0, "%s must exist for your docker container to run" % scoring_sh
+    #out = os.system('docker run -it --rm -e="CLI=true" %s [ -e %s ] || (echo "DoesNotExist" && exit 1)' % (dockerImage, scoring_sh))
+    #assert out==0, "%s must exist for your docker container to run" % scoring_sh
 
     checkExist = syn.query('select id from folder where parentId == "%s" and name == "%s"' % (CHALLENGE_LOG_PREDICTION_FOLDER, submission.id))
     if checkExist['totalNumberOfResults'] == 0:
