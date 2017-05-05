@@ -61,7 +61,7 @@ config_evaluations = [
 
 config_evaluations_map = {ev['id']:ev for ev in config_evaluations}
 
-def getBearerTokenURL(dockerRequestURL, user, password)
+def getBearerTokenURL(dockerRequestURL, user, password):
     initialReq = requests.get(dockerRequestURL)
     auth_headers = initialReq.headers['Www-Authenticate'].split(",")
     auth_headers = [i.split("=")[1].replace('"','') for i in auth_headers]
