@@ -76,7 +76,7 @@ def getBearerTokenURL(dockerRequestURL, user, password):
     return("{0}?service={1}&scope={2}".format(bearerRealm,service,scope))
 
 def getAuthToken(dockerRequestURL, user, password):
-    bearerTokenURL = getBearerTokenURL(dockerRequestURL)
+    bearerTokenURL = getBearerTokenURL(dockerRequestURL, user, password)
     auth = base64.b64encode(user + ":" + password)
     bearerTokenRequest = requests.get(bearerTokenURL,
         headers={'Authorization': 'Basic %s' % auth})
