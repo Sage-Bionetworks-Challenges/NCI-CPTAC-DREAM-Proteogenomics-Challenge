@@ -77,7 +77,7 @@ def getBearerTokenURL(dockerRequestURL, user, password):
 
 def getAuthToken(dockerRequestURL, user, password):
     bearerTokenURL = getBearerTokenURL(dockerRequestURL)
-    auth = base64.b64encode(user:password)
+    auth = base64.b64encode(user + ":" + password)
     bearerTokenRequest = requests.get(bearerTokenURL,
         headers={'Authorization': 'Basic %s' % auth})
     return(bearerTokenRequest.json()['token'])
