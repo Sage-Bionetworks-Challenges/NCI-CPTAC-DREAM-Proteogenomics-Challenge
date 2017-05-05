@@ -1,6 +1,7 @@
 import docker
 import json
 import subprocess
+import requests
 from synapseclient import File
 import zipfile
 import os
