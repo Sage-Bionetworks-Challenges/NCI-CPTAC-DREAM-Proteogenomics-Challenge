@@ -215,7 +215,7 @@ def dockerstop(evaluation, syn, client, dry_run=False):
                     submission_id=submission.id,
                     submission_name=submission.name)
 
-def validate(evaluation, syn, client, canCancel, dry_run=False):
+def validate(evaluation, syn, client, canCancel, user, password, dry_run=False):
 
     if type(evaluation) != Evaluation:
         evaluation = syn.getEvaluation(evaluation)
@@ -234,7 +234,7 @@ def validate(evaluation, syn, client, canCancel, dry_run=False):
         print "validating", submission.id, submission.name
         ex1 = None
         try:
-            is_valid, validation_message = conf.validate_docker(evaluation, submission, syn, client)
+            is_valid, validation_message = conf.validate_docker(evaluation, submission, syn, client, user, password)
         except Exception as ex1:
             is_valid = False
             print "Exception during validation:", type(ex1), ex1, ex1.message
@@ -576,9 +576,9 @@ def command_dockerstop(args):
 def command_validate(args):
     if args.all:
         for queue_info in conf.evaluation_queues:
-            validate(queue_info['id'], args.syn, args.client, args.canCancel, dry_run=args.dry_run)
+            validate(queue_info['id'], args.syn, args.client, args.canCancel, args.user, args.password, dry_run=args.dry_run)
     elif args.evaluation:
-        validate(args.evaluation, args.syn, args.client, args.canCancel, dry_run=args.dry_run)
+        validate(args.evaluation, args.syn, args.client, args.canCancel, args.user, args.password, dry_run=args.dry_run)
     else:
         sys.stderr.write("\nValidate command requires either an evaluation ID or --all to validate all queues in the challenge")
 
