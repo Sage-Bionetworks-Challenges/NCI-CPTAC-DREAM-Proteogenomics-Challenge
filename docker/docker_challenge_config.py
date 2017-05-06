@@ -102,15 +102,17 @@ def dockerValidate(submission, syn, user, password):
     dockerRequestURL = '{0}/v2/{1}/manifests/{2}'.format(index_endpoint, dockerRepo, dockerDigest)
     token = getAuthToken(dockerRequestURL, user, password)
 
-    resp = requests.get('{0}/v2/{1}/manifests/{2}'.format(index_endpoint, dockerRepo, dockerDigest),
+    resp = requests.get(dockerRequestURL,
                         headers={'Authorization': 'Bearer %s' % token})
-
     assert resp.status_code == 200, "Docker image + sha digest must exist"
-
+    
     #Must check docker image size
+    #Synapse docker registry
+    dockerSize = sum([layer['size'] for layer in resp.json()['layers']])
+    assert dockerSize/1000000 < 1000, "Docker image must be less than a teribyte"
+
     #Send email to me if harddrive is full 
     #should be stateless, if there needs to be code changes to the docker agent
-
     checkExist = syn.query('select id from folder where parentId == "%s" and name == "%s"' % (CHALLENGE_LOG_PREDICTION_FOLDER, submission.id))
     if checkExist['totalNumberOfResults'] == 0:
         predFolder = syn.store(Folder(submission.id, parent = CHALLENGE_LOG_PREDICTION_FOLDER))
