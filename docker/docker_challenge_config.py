@@ -91,7 +91,7 @@ def zipdir(path, ziph):
 def dockerValidate(submission, syn, user, password):
     submissionJson = json.loads(submission['entityBundleJSON'])
     assert submissionJson['entity'].get('repositoryName') is not None, "Must submit a docker container"
-    dockerRepo = submissionJson['entity']['repositoryName']
+    dockerRepo = submissionJson['entity']['repositoryName'].replace("docker.synapse.org/","")
     #assert dockerRepo.startswith("docker.synapse.org")
     assert submission.get('dockerDigest') is not None, "Must submit a docker container with a docker sha digest"
     dockerDigest = submission['dockerDigest']
