@@ -160,29 +160,30 @@ def dockerRun(submission, scoring_sh, syn, client):
         volumes[vol] = {'bind': MOUNTED_VOLUMES[vol].split(":")[0], 'mode': MOUNTED_VOLUMES[vol].split(":")[1]}
 
     # Run docker image
+    errors = ""
     try:
         container = client.containers.run(dockerImage, scoring_sh, detach=True,volumes = volumes, network_disabled=True)
     except docker.errors.APIError as e:
         container = None
         errors = str(e)
-
     #Create log file
     LogFileName = submission.id + "_log.txt"
     open(LogFileName,'w+').close()
     #While docker is still running (the docker python client doesn't update status)
-    while (subprocess.Popen(['docker','inspect','-f','{{.State.Running}}',container.name],stdout = subprocess.PIPE).communicate()[0] == "true\n") and container is not None:
-        for line in container.logs(stream=True):
-            with open(LogFileName,'a') as logFile:
-                logFile.write(line)
-            #Only store log file if > 0bytes
-            statinfo = os.stat(LogFileName)
-            if statinfo.st_size > 0:
-                ent = File(LogFileName, parent = logFolderId)
-                logs = syn.store(ent)
+    if container is not None:
+        errors += container.logs()
+        while subprocess.Popen(['docker','inspect','-f','{{.State.Running}}',container.name],stdout = subprocess.PIPE).communicate()[0] == "true\n":
+            for line in container.logs(stream=True):
+                with open(LogFileName,'a') as logFile:
+                    logFile.write(line)
+                #Only store log file if > 0bytes
+                statinfo = os.stat(LogFileName)
+                if statinfo.st_size > 0:
+                    ent = File(LogFileName, parent = logFolderId)
+                    logs = syn.store(ent)
     #if log file wasn't created, there is an issue
     if os.stat(LogFileName) == 0:
         with open(LogFileName, "w") as logs:
-            logs.write(container.logs())
             logs.write(errors)
         ent = File(LogFileName, parent = logFolderId)
         logs = syn.store(ent)
