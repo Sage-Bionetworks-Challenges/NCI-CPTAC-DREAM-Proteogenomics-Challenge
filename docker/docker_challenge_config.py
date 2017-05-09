@@ -3,6 +3,7 @@ import json
 import subprocess
 import requests
 from synapseclient import File, Folder
+import synapseutils as synu
 import zipfile
 import os
 import base64
