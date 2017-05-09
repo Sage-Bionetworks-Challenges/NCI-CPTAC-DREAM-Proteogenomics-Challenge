@@ -87,6 +87,10 @@ validation_passed_template = """\
 <p>submission name: <b>{submission_name}</b><br>
 submission ID: <b>{submission_id}</b></p>
 
+<blockquote><pre>
+{message}
+</pre></blockquote>
+
 <p>If you have questions, please ask on the forums at {support_forum_url} or refer to the challenge \
 instructions which can be found at {challenge_instructions_url}.</p>
 

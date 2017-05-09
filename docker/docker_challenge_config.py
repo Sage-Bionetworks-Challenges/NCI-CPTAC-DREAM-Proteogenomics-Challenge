@@ -210,7 +210,6 @@ def validate_docker(evaluation, submission, syn, client, user, password):
     results = dockerValidate(submission, syn, user, password)
     return(results)
 
-
 def run_docker(evaluation, submission, syn, client):
     """
     Find the right scoring function and score the submission

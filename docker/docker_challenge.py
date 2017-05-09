@@ -295,6 +295,7 @@ def validate(evaluation, syn, client, canCancel, user, password, dry_run=False):
                 userIds=[submission.userId],
                 username=get_user_name(profile),
                 queue_name=evaluation.name,
+                message=validation_message,
                 submission_id=submission.id,
                 submission_name=submission.name)
         else:
