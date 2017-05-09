@@ -160,12 +160,11 @@ def dockerRun(submission, scoring_sh, syn, client):
         volumes[vol] = {'bind': MOUNTED_VOLUMES[vol].split(":")[0], 'mode': MOUNTED_VOLUMES[vol].split(":")[1]}
 
     # Run docker image
-    container = client.containers.run(dockerRepo, 'bash /score_sc1.sh', detach=True,volumes = volumes, network_disabled=True)
+    container = client.containers.run(dockerImage, scoring_sh, detach=True,volumes = volumes, network_disabled=True)
     
     #Create log file
     LogFileName = submission.id + "_log.txt"
     open(LogFileName,'w+').close()
-    
     #While docker is still running (the docker python client doesn't update status)
     while subprocess.Popen(['docker','inspect','-f','{{.State.Running}}',container.name],stdout = subprocess.PIPE).communicate()[0] == "true\n":
         for line in container.logs(stream=True):
@@ -173,12 +172,15 @@ def dockerRun(submission, scoring_sh, syn, client):
                 logFile.write(line)
             #Only store log file if > 0bytes
             statinfo = os.stat(LogFileName)
-            if statinfo.st_size == 0:
-                with open(LogFileName, "w") as logs:
-                    logs.write("No logs... Processing complete")
-            ent = File(LogFileName, parent = logFolderId)
-            logs = syn.store(ent)
-
+            if statinfo.st_size > 0:
+                ent = File(LogFileName, parent = logFolderId)
+                logs = syn.store(ent)
+    #if log file wasn't created, there is an issue
+    if os.stat(LogFileName) == 0:
+        with open(LogFileName, "w") as logs:
+            logs.write(container.logs())
+        ent = File(LogFileName, parent = logFolderId)
+        logs = syn.store(ent)
     #Remove container after being done
     container.remove()
     client.images.remove(dockerImage)
