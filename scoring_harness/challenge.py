@@ -356,8 +356,6 @@ def invalidateSubmission(evaluation, dry_run=False):
             status.status = "INVALID"
             syn.store(status)
 
-
-
 def create_leaderboard_table(name, columns, parent, evaluation, dry_run=False):
     if not dry_run:
         schema = syn.store(Schema(name=name, columns=cols, parent=project))
