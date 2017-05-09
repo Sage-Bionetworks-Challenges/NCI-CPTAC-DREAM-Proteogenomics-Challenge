@@ -8,19 +8,21 @@ import os
 import base64
 
 #Synapse Id of Challenge
-CHALLENGE_SYN_ID = "syn1235"
+CHALLENGE_SYN_ID = "syn8228304"
 #Synapse Id of directory that you want the log files to go into
-CHALLENGE_LOG_FOLDER = "syn8729051"
+CHALLENGE_LOG_FOLDER = "syn9771357"
 CHALLENGE_PREDICTION_FOLDER = "syn8729051"
 #These are the volumes that you want to mount onto your docker container
 OUTPUT_DIR = '/home/ubuntu/output'
-TESTDATA_DIR = '/home/ubuntu/test-data'
+TESTDATA_DIR = '/home/ubuntu/evaluation_data'
+TRAINING_DIR = 'home/ubuntu/training_data'
 #These are the locations on the docker that you want your mounted volumes to be + permissions in docker (ro, rw)
 #It has to be in this format '/output:rw'
 MOUNTED_VOLUMES = {OUTPUT_DIR:'/output:rw',
-				   TESTDATA_DIR:'/test-data:ro'}
+				   TESTDATA_DIR:'/evaluation_data:ro',
+                   TRAINING_DIR:'/training_data:ro'}
 #All mounted volumes here in a list
-ALL_VOLUMES = [OUTPUT_DIR,TESTDATA_DIR]
+ALL_VOLUMES = [OUTPUT_DIR,TESTDATA_DIR,TRAINING_DIR]
 
 ## Name of your challenge, defaults to the name of the challenge's project
 CHALLENGE_NAME = "Example Synapse Challenge"
@@ -113,24 +115,32 @@ def dockerValidate(submission, syn, user, password):
 
     #Send email to me if harddrive is full 
     #should be stateless, if there needs to be code changes to the docker agent
-    checkExist = syn.query('select id from folder where parentId == "%s" and name == "%s"' % (CHALLENGE_LOG_PREDICTION_FOLDER, submission.id))
-    if checkExist['totalNumberOfResults'] == 0:
-        predFolder = syn.store(Folder(submission.id, parent = CHALLENGE_LOG_PREDICTION_FOLDER))
+    checkPredExist = syn.query('select id from folder where parentId == "%s" and name == "%s"' % (CHALLENGE_PREDICTION_FOLDER, submission.id))
+    checkLogExist = syn.query('select id from folder where parentId == "%s" and name == "%s"' % (CHALLENGE_LOG_FOLDER, submission.id))
+
+    if checkPredExist['totalNumberOfResults'] == 0:
+        predFolder = syn.store(Folder(submission.id, parent = CHALLENGE_PREDICTION_FOLDER))
         predFolder = predFolder.id
     else:
         predFolder = checkExist['results'][0]['folder.id']
+    if checkLogExist['totalNumberOfResults'] == 0:
+        logFolder = syn.store(Folder(submission.id, parent = CHALLENGE_LOG_FOLDER))
+        logFolder = logFolder.id
+    else:
+        logFolder = checkExist['results'][0]['folder.id']      
     for participant in submission.contributors:
         if participant['principalId'] in ADMIN_USER_IDS: 
             access = ['CREATE', 'READ', 'UPDATE', 'DELETE', 'CHANGE_PERMISSIONS', 'MODERATE', 'CHANGE_SETTINGS']
         else:
             access = ['READ']
-        syn.setPermissions(predFolder, principalId = participant['principalId'], accessType = access)
-
+        #Comment set permissions out if you don't want to allow participants to see the pred files
+        #syn.setPermissions(predFolder, principalId = participant['principalId'], accessType = access)
+        syn.setPermissions(logFolder, principalId = participant['principalId'], accessType = access)
     return(True, "Your submission has been validated!  As your submission is being scored, please go here: https://www.synapse.org/#!Synapse:%s to check on your log files and resulting prediction files." % predFolder)
 
 
 def dockerRun(submission, scoring_sh, syn, client):
-    allSubmissions = synu.walk(syn, CHALLENGE_LOG_PREDICTION_FOLDER)
+    allSubmissions = synu.walk(syn, CHALLENGE_LOG_FOLDER)
     predFolder = allSubmissions.next()
     predFolderId = [synId for name, synId in predFolder[1] if name == submission.id][0]
 
@@ -205,7 +215,9 @@ def run_docker(evaluation, submission):
     config = config_evaluations_map[int(evaluation.id)]
     prediction_synId, log_synId =  dockerRun(submission,config['score_sh'], syn, client)
     if prediction_synId is not None:
-        message = "You can find your prediction file here: https://www.synapse.org/#!Synapse:%s" % prediction_synId
+        #Comment top line if you don't want to return the synId of prediction file
+        #message = "You can find your prediction file here: https://www.synapse.org/#!Synapse:%s" % prediction_synId
+        message = "Your prediction file has been stored, but you will not have access to it."
     else:
         message = "No prediction file generated, please check your log files!"
     return (dict(PREDICTION_FILE=prediction_synId, LOG_FILE = log_synId), message)
