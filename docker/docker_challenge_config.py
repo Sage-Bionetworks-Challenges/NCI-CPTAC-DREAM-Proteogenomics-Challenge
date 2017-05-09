@@ -181,14 +181,15 @@ def dockerRun(submission, scoring_sh, syn, client):
                 if statinfo.st_size > 0:
                     ent = File(LogFileName, parent = logFolderId)
                     logs = syn.store(ent)
+        #Remove container after being done
+        container.remove()
     #if log file wasn't created, there is an issue
     if os.stat(LogFileName) == 0:
         with open(LogFileName, "w") as logs:
             logs.write(errors)
         ent = File(LogFileName, parent = logFolderId)
         logs = syn.store(ent)
-    #Remove container after being done
-    container.remove()
+    
     client.images.remove(dockerImage)
     #Zip up predictions and store it into CHALLENGE_PREDICTIONS_FOLDER
     if len(os.listdir(OUTPUT_DIR)) > 0:
