@@ -19,7 +19,7 @@ TRAINING_DIR = 'home/ubuntu/training_data'
 #These are the locations on the docker that you want your mounted volumes to be + permissions in docker (ro, rw)
 #It has to be in this format '/output:rw'
 MOUNTED_VOLUMES = {OUTPUT_DIR:'/output:rw',
-				   TESTDATA_DIR:'/evaluation_data:ro',
+                   TESTDATA_DIR:'/evaluation_data:ro',
                    TRAINING_DIR:'/training_data:ro'}
 #All mounted volumes here in a list
 ALL_VOLUMES = [OUTPUT_DIR,TESTDATA_DIR,TRAINING_DIR]
@@ -84,10 +84,10 @@ def getAuthToken(dockerRequestURL, user, password):
     return(bearerTokenRequest.json()['token'])
 
 def zipdir(path, ziph):
-	# ziph is zipfile handle
-	for root, dirs, files in os.walk(path):
-		for file in files:
-			ziph.write(os.path.join(root, file),os.path.join(root, file).replace(path+"/",""))
+    # ziph is zipfile handle
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            ziph.write(os.path.join(root, file),os.path.join(root, file).replace(path+"/",""))
 
 
 def dockerValidate(submission, syn, user, password):
@@ -149,30 +149,30 @@ def dockerRun(submission, scoring_sh, syn, client):
     dockerRepo = submissionJson['entity']['repositoryName']
     dockerImage = dockerRepo + "@" + dockerDigest
 
-	#Mount volumes
-	volumes = {}
-	for vol in ALL_VOLUMES:
-		volumes[vol] = {'bind': MOUNTED_VOLUMES[vol].split(":")[0], 'mode': MOUNTED_VOLUMES[vol].split(":")[1]}
+    #Mount volumes
+    volumes = {}
+    for vol in ALL_VOLUMES:
+        volumes[vol] = {'bind': MOUNTED_VOLUMES[vol].split(":")[0], 'mode': MOUNTED_VOLUMES[vol].split(":")[1]}
 
-	# Run docker image
-	container = client.containers.run(dockerRepo, 'bash /score_sc1.sh', detach=True,volumes = volumes, network_disabled=True)
-	
-	#Create log file
-	LogFileName = submission.id + "_log.txt"
-	open(LogFileName,'w+').close()
-	
-	#While docker is still running (the docker python client doesn't update status)
-	while subprocess.Popen(['docker','inspect','-f','{{.State.Running}}',container.name],stdout = subprocess.PIPE).communicate()[0] == "true\n":
-		for line in container.logs(stream=True):
-			with open(LogFileName,'a') as logFile:
-				logFile.write(line)
-			#Only store log file if > 0bytes
-			statinfo = os.stat(LogFileName)
-			if statinfo.st_size > 0:
-				ent = File(LogFileName, parent = CHALLENGE_LOG_FOLDER)
-				logs = syn.store(ent)
+    # Run docker image
+    container = client.containers.run(dockerRepo, 'bash /score_sc1.sh', detach=True,volumes = volumes, network_disabled=True)
+    
+    #Create log file
+    LogFileName = submission.id + "_log.txt"
+    open(LogFileName,'w+').close()
+    
+    #While docker is still running (the docker python client doesn't update status)
+    while subprocess.Popen(['docker','inspect','-f','{{.State.Running}}',container.name],stdout = subprocess.PIPE).communicate()[0] == "true\n":
+        for line in container.logs(stream=True):
+            with open(LogFileName,'a') as logFile:
+                logFile.write(line)
+            #Only store log file if > 0bytes
+            statinfo = os.stat(LogFileName)
+            if statinfo.st_size > 0:
+                ent = File(LogFileName, parent = CHALLENGE_LOG_FOLDER)
+                logs = syn.store(ent)
 
-	#Remove container after being done
+    #Remove container after being done
     container.remove()
     client.images.remove(dockerImage)
     #Zip up predictions and store it into CHALLENGE_PREDICTIONS_FOLDER
@@ -192,25 +192,25 @@ def dockerRun(submission, scoring_sh, syn, client):
 
 
 def validate_docker(evaluation, submission, syn, client, user, password):
-	"""
-	Find the right validation function and validate the submission.
+    """
+    Find the right validation function and validate the submission.
 
-	:returns: (True, message) if validated, (False, message) if
-			  validation fails or throws exception
-	"""
+    :returns: (True, message) if validated, (False, message) if
+              validation fails or throws exception
+    """
     config = config_evaluations_map[int(evaluation.id)]
 
     results = dockerValidate(submission, syn, user, password)
-	return(results)
+    return(results)
 
 
 def run_docker(evaluation, submission):
-	"""
-	Find the right scoring function and score the submission
+    """
+    Find the right scoring function and score the submission
 
-	:returns: (score, message) where score is a dict of stats and message
-			  is text for display to user
-	"""
+    :returns: (score, message) where score is a dict of stats and message
+              is text for display to user
+    """
 
     config = config_evaluations_map[int(evaluation.id)]
     prediction_synId, log_synId =  dockerRun(submission,config['score_sh'], syn, client)
