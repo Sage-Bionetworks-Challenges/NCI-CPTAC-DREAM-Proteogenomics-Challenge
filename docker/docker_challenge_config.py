@@ -122,12 +122,12 @@ def dockerValidate(submission, syn, user, password):
         predFolder = syn.store(Folder(submission.id, parent = CHALLENGE_PREDICTION_FOLDER))
         predFolder = predFolder.id
     else:
-        predFolder = checkExist['results'][0]['folder.id']
+        predFolder = checkPredExist['results'][0]['folder.id']
     if checkLogExist['totalNumberOfResults'] == 0:
         logFolder = syn.store(Folder(submission.id, parent = CHALLENGE_LOG_FOLDER))
         logFolder = logFolder.id
     else:
-        logFolder = checkExist['results'][0]['folder.id']      
+        logFolder = checkLogExist['results'][0]['folder.id']      
     for participant in submission.contributors:
         if participant['principalId'] in ADMIN_USER_IDS: 
             access = ['CREATE', 'READ', 'UPDATE', 'DELETE', 'CHANGE_PERMISSIONS', 'MODERATE', 'CHANGE_SETTINGS']
