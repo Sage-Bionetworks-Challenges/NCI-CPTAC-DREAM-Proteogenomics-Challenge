@@ -141,8 +141,12 @@ def dockerValidate(submission, syn, user, password):
 
 
 def dockerRun(submission, scoring_sh, syn, client):
-    allSubmissions = synu.walk(syn, CHALLENGE_LOG_FOLDER)
-    predFolder = allSubmissions.next()
+    allLogs = synu.walk(syn, CHALLENGE_LOG_FOLDER)
+    logFolder = allLogs.next()
+    logFolderId = [synId for name, synId in logFolder[1] if name == submission.id][0]
+    
+    allPreds = synu.walk(syn, CHALLENGE_PREDICTION_FOLDER)
+    predFolder = allPreds.next()
     predFolderId = [synId for name, synId in predFolder[1] if name == submission.id][0]
 
     dockerDigest = submission.get('dockerDigest')
@@ -169,9 +173,11 @@ def dockerRun(submission, scoring_sh, syn, client):
                 logFile.write(line)
             #Only store log file if > 0bytes
             statinfo = os.stat(LogFileName)
-            if statinfo.st_size > 0:
-                ent = File(LogFileName, parent = CHALLENGE_LOG_FOLDER)
-                logs = syn.store(ent)
+            if statinfo.st_size == 0:
+                with open(LogFileName, "w") as logs:
+                    logs.write("No logs... Processing complete")
+            ent = File(LogFileName, parent = logFolderId)
+            logs = syn.store(ent)
 
     #Remove container after being done
     container.remove()
