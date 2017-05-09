@@ -25,11 +25,11 @@ MOUNTED_VOLUMES = {OUTPUT_DIR:'/output:rw',
 ALL_VOLUMES = [OUTPUT_DIR,TESTDATA_DIR,TRAINING_DIR]
 
 ## Name of your challenge, defaults to the name of the challenge's project
-CHALLENGE_NAME = "Example Synapse Challenge"
+CHALLENGE_NAME = "NCI-CPTAC DREAM Proteogenomics Challenge"
 
 ## Synapse user IDs of the challenge admins who will be notified by email
 ## about errors in the scoring script
-ADMIN_USER_IDS = ['123234']
+ADMIN_USER_IDS = ['3324230']
 
 
 config_evaluations = [
