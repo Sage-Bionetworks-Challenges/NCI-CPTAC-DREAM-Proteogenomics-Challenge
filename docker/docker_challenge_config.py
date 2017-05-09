@@ -160,8 +160,11 @@ def dockerRun(submission, scoring_sh, syn, client):
         volumes[vol] = {'bind': MOUNTED_VOLUMES[vol].split(":")[0], 'mode': MOUNTED_VOLUMES[vol].split(":")[1]}
 
     # Run docker image
-    container = client.containers.run(dockerImage, scoring_sh, detach=True,volumes = volumes, network_disabled=True)
-    
+    try:
+        container = client.containers.run(dockerImage, scoring_sh, detach=True,volumes = volumes, network_disabled=True)
+    except docker.errors.APIError as e:
+        errors = str(e)
+        
     #Create log file
     LogFileName = submission.id + "_log.txt"
     open(LogFileName,'w+').close()
@@ -179,6 +182,7 @@ def dockerRun(submission, scoring_sh, syn, client):
     if os.stat(LogFileName) == 0:
         with open(LogFileName, "w") as logs:
             logs.write(container.logs())
+            logs.write(errors)
         ent = File(LogFileName, parent = logFolderId)
         logs = syn.store(ent)
     #Remove container after being done
