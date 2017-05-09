@@ -16,7 +16,7 @@ CHALLENGE_PREDICTION_FOLDER = "syn8729051"
 #These are the volumes that you want to mount onto your docker container
 OUTPUT_DIR = '/home/ubuntu/output'
 TESTDATA_DIR = '/home/ubuntu/evaluation_data'
-TRAINING_DIR = 'home/ubuntu/training_data'
+TRAINING_DIR = '/home/ubuntu/training_data'
 #These are the locations on the docker that you want your mounted volumes to be + permissions in docker (ro, rw)
 #It has to be in this format '/output:rw'
 MOUNTED_VOLUMES = {OUTPUT_DIR:'/output:rw',
