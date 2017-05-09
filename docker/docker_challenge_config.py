@@ -163,13 +163,14 @@ def dockerRun(submission, scoring_sh, syn, client):
     try:
         container = client.containers.run(dockerImage, scoring_sh, detach=True,volumes = volumes, network_disabled=True)
     except docker.errors.APIError as e:
+        container = None
         errors = str(e)
-        
+
     #Create log file
     LogFileName = submission.id + "_log.txt"
     open(LogFileName,'w+').close()
     #While docker is still running (the docker python client doesn't update status)
-    while subprocess.Popen(['docker','inspect','-f','{{.State.Running}}',container.name],stdout = subprocess.PIPE).communicate()[0] == "true\n":
+    while (subprocess.Popen(['docker','inspect','-f','{{.State.Running}}',container.name],stdout = subprocess.PIPE).communicate()[0] == "true\n") and container is not None:
         for line in container.logs(stream=True):
             with open(LogFileName,'a') as logFile:
                 logFile.write(line)
