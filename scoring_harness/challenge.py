@@ -89,20 +89,55 @@ def get_user_name(profile):
         names.append(profile['userName'])
     return " ".join(names)
 
-def update_single_submission_status(status, add_annotations):
-    for keys in add_annotations:
-        if status.get("annotations") is not None:
-            if status.annotations.get(keys) is not None:
-                for annots in add_annotations[keys]:
-                    total_annots = filter(lambda input: input.get('key', None) == annots['key'], status.annotations[keys])
-                    if len(total_annots) == 1:
-                        total_annots[0]['value'] = annots['value']
-                    else:
-                        status.annotations[keys].extend([annots])
+def update_single_submission_status(status, add_annotations, force=False):
+    """
+    This will update a single submission's status
+    :param:    Submission status: syn.getSubmissionStatus()
+
+    :param:    Annotations that you want to add in dict or submission status annotations format.
+               If dict, all submissions will be added as private submissions
+    """
+    existingAnnotations = status.get("annotations")
+
+    privateAnnotations = {each['key']:each['value'] for annots in existingAnnotations for each in existingAnnotations[annots] if annots not in ['scopeId','objectId'] and each['isPrivate'] == True}
+    publicAnnotations = {each['key']:each['value'] for annots in existingAnnotations for each in existingAnnotations[annots] if annots not in ['scopeId','objectId'] and each['isPrivate'] == False}
+
+    if not synapseclient.annotations.is_submission_status_annotations(add_annotations):
+        privateAddedAnnotations = add_annotations
+        publicAddedAnnotations = dict()
+    else:
+        privateAddedAnnotations = {each['key']:each['value'] for annots in existingAnnotations for each in add_annotations[annots] if annots not in ['scopeId','objectId'] and each['isPrivate'] == True}
+        publicAddedAnnotations = {each['key']:each['value'] for annots in existingAnnotations for each in add_annotations[annots] if annots not in ['scopeId','objectId'] and each['isPrivate'] == False} 
+    #If you add a private annotation that appears in the public annotation, it switches 
+    if sum([key in publicAddedAnnotations for key in privateAnnotations]) == 0:
+        pass
+    elif sum([key in publicAddedAnnotations for key in privateAnnotations]) >0 and force:
+        privateAnnotations = {key:privateAnnotations[key] for key in privateAnnotations if key not in publicAddedAnnotations}
+    else:
+        raise ValueError("You are trying to add public annotations that are already part of the existing private annotations: %s.  Either change the annotation key or specify force=True" % ", ".join([key for key in privateAnnotations if key in publicAddedAnnotations]))
+    if sum([key in privateAddedAnnotations for key in publicAnnotations]) == 0:
+        pass
+    elif sum([key in privateAddedAnnotations for key in publicAnnotations])>0 and force:
+        publicAnnotations= {key:publicAnnotations[key] for key in publicAnnotations if key not in privateAddedAnnotations}
+    else:
+        raise ValueError("You are trying to add private annotations that are already part of the existing public annotations: %s.  Either change the annotation key or specify force=True" % ", ".join([key for key in publicAnnotations if key in privateAddedAnnotations]))
+
+    privateAnnotations.update(privateAddedAnnotations)
+    publicAnnotations.update(publicAddedAnnotations)
+
+    priv = synapseclient.annotations.to_submission_status_annotations(privateAnnotations, is_private=True)
+    pub = synapseclient.annotations.to_submission_status_annotations(publicAnnotations, is_private=False)
+
+    for annotType in ['stringAnnos', 'longAnnos', 'doubleAnnos']:
+        if priv.get(annotType) is not None and pub.get(annotType) is not None:
+            if pub.get(annotType) is not None:
+                priv[annotType].extend(pub[annotType])
             else:
-                status.annotations[keys] = add_annotations[keys]
-        else:
-            status.annotations = add_annotations
+                priv[annotType] = pub[annotType]
+        elif priv.get(annotType) is None and pub.get(annotType) is not None:
+            priv[annotType] = pub[annotType]
+
+    status.annotations = priv
     return(status)
 
 def update_submissions_status_batch(evaluation, statuses):
