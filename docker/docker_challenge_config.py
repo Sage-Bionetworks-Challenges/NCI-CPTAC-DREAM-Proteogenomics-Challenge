@@ -2,7 +2,7 @@ import docker
 import json
 import subprocess
 import requests
-from synapseclient import File
+from synapseclient import File, Folder
 import zipfile
 import os
 import base64
