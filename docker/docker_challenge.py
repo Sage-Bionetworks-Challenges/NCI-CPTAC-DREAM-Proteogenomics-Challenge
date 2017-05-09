@@ -552,7 +552,7 @@ def command_list(args):
     the evaluation queues associated with a given project.
     """
     if args.all:
-        for queue_info in conf.evaluation_queues:
+        for queue_info in conf.config_evaluations:
             list_submissions(evaluation=queue_info['id'],
                              status=args.status)
     elif args.challenge_project:
@@ -578,7 +578,7 @@ def command_check_status(args):
 
 def command_reset(args):
     if args.rescore_all:
-        for queue_info in conf.evaluation_queues:
+        for queue_info in conf.config_evaluations:
             for submission, status in syn.getSubmissionBundles(queue_info['id'], status="SCORED"):
                 status.status = args.status
                 if not args.dry_run:
@@ -601,7 +601,7 @@ def command_reset(args):
 
 def command_dockerstop(args):
     if args.all:
-        for queue_info in conf.evaluation_queues:
+        for queue_info in conf.config_evaluations:
             dockerstop(queue_info['id'], args.syn, args.client, dry_run=args.dry_run)
     elif args.evaluation:
         dockerstop(args.evaluation, args.syn, args.client, dry_run=args.dry_run)
@@ -610,7 +610,7 @@ def command_dockerstop(args):
 
 def command_validate(args):
     if args.all:
-        for queue_info in conf.evaluation_queues:
+        for queue_info in conf.config_evaluations:
             validate(queue_info['id'], args.syn, args.client, args.canCancel, args.user, args.password, dry_run=args.dry_run)
     elif args.evaluation:
         validate(args.evaluation, args.syn, args.client, args.canCancel, args.user, args.password, dry_run=args.dry_run)
@@ -619,7 +619,7 @@ def command_validate(args):
 
 def command_score(args):
     if args.all:
-        for queue_info in conf.evaluation_queues:
+        for queue_info in conf.config_evaluations:
             score(queue_info['id'], args.syn, args.client, args.canCancel, dry_run=args.dry_run)
     elif args.evaluation:
         score(args.evaluation, args.syn, args.client, args.canCancel, dry_run=args.dry_run)
@@ -773,5 +773,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-x
