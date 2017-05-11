@@ -162,7 +162,7 @@ def dockerRun(submission, scoring_sh, syn, client):
     # Run docker image
     errors = ""
     try:
-        container = client.containers.run(dockerImage, scoring_sh, detach=True,volumes = volumes, network_disabled=True)
+        container = client.containers.run(dockerImage, scoring_sh, detach=True,volumes = volumes, network_mode="none")
     except docker.errors.APIError as e:
         container = None
         errors = str(e)
@@ -190,7 +190,7 @@ def dockerRun(submission, scoring_sh, syn, client):
         ent = File(LogFileName, parent = logFolderId)
         logs = syn.store(ent)
     
-    client.images.remove(dockerImage)
+    #client.images.remove(dockerRepo)
     #Zip up predictions and store it into CHALLENGE_PREDICTIONS_FOLDER
     if len(os.listdir(OUTPUT_DIR)) > 0:
         zipf = zipfile.ZipFile(submission.id + '_predictions.zip', 'w', zipfile.ZIP_DEFLATED)

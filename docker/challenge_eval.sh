@@ -4,7 +4,7 @@ cd ./
 #---------------------
 #Validate submissions
 #---------------------
-python docker_challenge.py -u "synapse user here" -p "password" --send-messages --notifications validate --all >> log/score.log 2>&1
+python docker_challenge.py -u "synapse user here" -p "password" --send-messages --acknowledge-receipt --notifications validate --all >> log/score.log 2>&1
 
 #--------------------
 #Score submissions
