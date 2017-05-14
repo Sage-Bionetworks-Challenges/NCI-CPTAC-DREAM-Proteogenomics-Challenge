@@ -17,6 +17,10 @@ CHALLENGE_PREDICTION_FOLDER = "syn8729051"
 OUTPUT_DIR = '/home/ubuntu/output'
 TESTDATA_DIR = '/home/ubuntu/evaluation_data'
 TRAINING_DIR = '/home/ubuntu/training_data'
+
+# OUTPUT_DIR = 'output'
+# TESTDATA_DIR = 'evaluation_data'
+# TRAINING_DIR = 'training_data'
 #These are the locations on the docker that you want your mounted volumes to be + permissions in docker (ro, rw)
 #It has to be in this format '/output:rw'
 MOUNTED_VOLUMES = {OUTPUT_DIR:'/output:rw',
@@ -34,11 +38,9 @@ ADMIN_USER_IDS = ['3324230']
 
 
 config_evaluations = [
-#Proteogenomics Subchallenge 1  (8720143)
-#Proteogenomics Subchallenge 2a  (8720145)
-#Proteogenomics Subchallenge 2b  (8720147)
-#Proteogenomics Subchallenge 3a (8720149)
-#Proteogenomics Subchallenge 3b  (8720151)
+#Proteogenomics Subchallenge 1 (8720143)
+#Proteogenomics Subchallenge 2 (8720145)
+#Proteogenomics Subchallenge 3 (8720149)
 
     {
         'id':8720143,
@@ -49,16 +51,8 @@ config_evaluations = [
         'score_sh':'/score_sc2.sh'
     },
     {
-        'id':8720147,
-        'score_sh':'/score_sc2b.sh'
-    },
-    {
         'id':8720149,
-        'score_sh':'/score_sc3a.sh'
-    },
-    {
-        'id':8720151,
-        'score_sh':'/score_sc3b.sh'
+        'score_sh':'/score_sc3.sh'
     }
 
 ]
