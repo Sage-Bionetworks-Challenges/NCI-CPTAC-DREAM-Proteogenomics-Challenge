@@ -18,9 +18,9 @@ OUTPUT_DIR = '/home/ubuntu/output'
 TESTDATA_DIR = '/home/ubuntu/evaluation_data'
 TRAINING_DIR = '/home/ubuntu/training_data'
 
-# OUTPUT_DIR = 'output'
-# TESTDATA_DIR = 'evaluation_data'
-# TRAINING_DIR = 'training_data'
+OUTPUT_DIR = '/Users/thomasyu/sage_projects/DREAM_challenges/NCI-CPTAC/NCI-CPTAC-Challenge/docker/output'
+TESTDATA_DIR = '/Users/thomasyu/sage_projects/DREAM_challenges/NCI-CPTAC/NCI-CPTAC-Challenge/docker/evaluation_data'
+TRAINING_DIR = '/Users/thomasyu/sage_projects/DREAM_challenges/NCI-CPTAC/NCI-CPTAC-Challenge/docker/training_data'
 #These are the locations on the docker that you want your mounted volumes to be + permissions in docker (ro, rw)
 #It has to be in this format '/output:rw'
 MOUNTED_VOLUMES = {OUTPUT_DIR:'/output:rw',
@@ -58,6 +58,7 @@ config_evaluations = [
 ]
 
 config_evaluations_map = {ev['id']:ev for ev in config_evaluations}
+leaderboard_tables = {}
 
 def getBearerTokenURL(dockerRequestURL, user, password):
     initialReq = requests.get(dockerRequestURL)
@@ -110,27 +111,33 @@ def dockerValidate(submission, syn, user, password):
 
     #Send email to me if harddrive is full 
     #should be stateless, if there needs to be code changes to the docker agent
-    checkPredExist = syn.query('select id from folder where parentId == "%s" and name == "%s"' % (CHALLENGE_PREDICTION_FOLDER, submission.id))
-    checkLogExist = syn.query('select id from folder where parentId == "%s" and name == "%s"' % (CHALLENGE_LOG_FOLDER, submission.id))
+    preds = synu.walk(syn, CHALLENGE_PREDICTION_FOLDER)
+    predFolders = preds.next()[1]
+    predSynId = [synId for name, synId in predFolders if str(submission.id) == name]
 
-    if checkPredExist['totalNumberOfResults'] == 0:
+    logs = synu.walk(syn, CHALLENGE_LOG_FOLDER)
+    logsFolders = logs.next()[1]
+    logsSynId = [synId for name, synId in logsFolders if str(submission.id) == name]
+
+    if len(predSynId) == 0:
         predFolder = syn.store(Folder(submission.id, parent = CHALLENGE_PREDICTION_FOLDER))
         predFolder = predFolder.id
     else:
-        predFolder = checkPredExist['results'][0]['folder.id']
-    if checkLogExist['totalNumberOfResults'] == 0:
+        predFolder = predSynId[0]
+    if len(logsSynId) == 0:
         logFolder = syn.store(Folder(submission.id, parent = CHALLENGE_LOG_FOLDER))
         logFolder = logFolder.id
+        for participant in submission.contributors:
+            if participant['principalId'] in ADMIN_USER_IDS: 
+                access = ['CREATE', 'READ', 'UPDATE', 'DELETE', 'CHANGE_PERMISSIONS', 'MODERATE', 'CHANGE_SETTINGS']
+            else:
+                access = ['READ']
+            #Comment set permissions out if you don't want to allow participants to see the pred files
+            #syn.setPermissions(predFolder, principalId = participant['principalId'], accessType = access)
+            syn.setPermissions(logFolder, principalId = participant['principalId'], accessType = access)
     else:
-        logFolder = checkLogExist['results'][0]['folder.id']      
-    for participant in submission.contributors:
-        if participant['principalId'] in ADMIN_USER_IDS: 
-            access = ['CREATE', 'READ', 'UPDATE', 'DELETE', 'CHANGE_PERMISSIONS', 'MODERATE', 'CHANGE_SETTINGS']
-        else:
-            access = ['READ']
-        #Comment set permissions out if you don't want to allow participants to see the pred files
-        #syn.setPermissions(predFolder, principalId = participant['principalId'], accessType = access)
-        syn.setPermissions(logFolder, principalId = participant['principalId'], accessType = access)
+        logFolder = logsSynId[0]      
+
     return(True, "Your submission has been validated!  As your submission is being scored, please go here: https://www.synapse.org/#!Synapse:%s to check on your log files and resulting prediction files." % predFolder)
 
 
@@ -160,6 +167,8 @@ def dockerRun(submission, scoring_sh, syn, client):
     except docker.errors.APIError as e:
         container = None
         errors = str(e)
+    print(container)
+    print(errors)
     #Create log file
     LogFileName = submission.id + "_log.txt"
     open(LogFileName,'w+').close()
@@ -178,9 +187,9 @@ def dockerRun(submission, scoring_sh, syn, client):
         #Remove container after being done
         container.remove()
     #if log file wasn't created, there is an issue
-    if os.stat(LogFileName) == 0:
-        with open(LogFileName, "w") as logs:
-            logs.write(errors)
+    if os.stat(LogFileName).st_size == 0:
+        with open(LogFileName, "w") as logfile:
+            logfile.write("No Logs")
         ent = File(LogFileName, parent = logFolderId)
         logs = syn.store(ent)
     
