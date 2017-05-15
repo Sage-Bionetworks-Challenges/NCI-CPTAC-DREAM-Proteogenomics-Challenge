@@ -18,9 +18,9 @@ OUTPUT_DIR = '/home/ubuntu/output'
 TESTDATA_DIR = '/home/ubuntu/evaluation_data'
 TRAINING_DIR = '/home/ubuntu/training_data'
 
-OUTPUT_DIR = '/Users/thomasyu/sage_projects/DREAM_challenges/NCI-CPTAC/NCI-CPTAC-Challenge/docker/output'
-TESTDATA_DIR = '/Users/thomasyu/sage_projects/DREAM_challenges/NCI-CPTAC/NCI-CPTAC-Challenge/docker/evaluation_data'
-TRAINING_DIR = '/Users/thomasyu/sage_projects/DREAM_challenges/NCI-CPTAC/NCI-CPTAC-Challenge/docker/training_data'
+# OUTPUT_DIR = '/Users/thomasyu/sage_projects/DREAM_challenges/NCI-CPTAC/NCI-CPTAC-Challenge/docker/output'
+# TESTDATA_DIR = '/Users/thomasyu/sage_projects/DREAM_challenges/NCI-CPTAC/NCI-CPTAC-Challenge/docker/evaluation_data'
+# TRAINING_DIR = '/Users/thomasyu/sage_projects/DREAM_challenges/NCI-CPTAC/NCI-CPTAC-Challenge/docker/training_data'
 #These are the locations on the docker that you want your mounted volumes to be + permissions in docker (ro, rw)
 #It has to be in this format '/output:rw'
 MOUNTED_VOLUMES = {OUTPUT_DIR:'/output:rw',
