@@ -389,9 +389,9 @@ def score(evaluation, syn, client, canCancel, dry_run=False):
                 submission_id=submission.id)
         else:
             messages.scoring_error(
-                userIds=conf.ADMIN_USER_IDS,
+                userIds=[submission.userId],
                 message=message,
-                username="Challenge Administrator",
+                username=get_user_name(profile),
                 queue_name=evaluation.name,
                 submission_name=submission.name,
                 submission_id=submission.id)

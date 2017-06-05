@@ -158,20 +158,17 @@ def dockerRun(submission, scoring_sh, syn, client):
         volumes[vol] = {'bind': MOUNTED_VOLUMES[vol].split(":")[0], 'mode': MOUNTED_VOLUMES[vol].split(":")[1]}
 
     # Run docker image
-    errors = ""
+    errors = None
     try:
-        container = client.containers.run(dockerImage, scoring_sh, detach=True,volumes = volumes, network_mode="none")
+        container = client.containers.run(dockerImage, scoring_sh, detach=True,volumes = volumes, name=submission.id, network_disabled=True)
     except docker.errors.APIError as e:
         container = None
-        errors = str(e)
-    print(container)
-    print(errors)
+        errors = str(e) + "\n"
     #Create log file
     LogFileName = submission.id + "_log.txt"
     open(LogFileName,'w+').close()
     #While docker is still running (the docker python client doesn't update status)
     if container is not None:
-        errors += container.logs()
         while subprocess.Popen(['docker','inspect','-f','{{.State.Running}}',container.name],stdout = subprocess.PIPE).communicate()[0] == "true\n":
             for line in container.logs(stream=True):
                 with open(LogFileName,'a') as logFile:
@@ -186,7 +183,10 @@ def dockerRun(submission, scoring_sh, syn, client):
     #if log file wasn't created, there is an issue
     if os.stat(LogFileName).st_size == 0:
         with open(LogFileName, "w") as logfile:
-            logfile.write("No Logs")
+            if errors is not None:
+                logfile.write(errors)
+            else:
+                logfile.write("No Logs")
         ent = File(LogFileName, parent = logFolderId)
         logs = syn.store(ent)
     

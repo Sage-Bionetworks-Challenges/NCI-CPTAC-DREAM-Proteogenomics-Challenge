@@ -98,7 +98,7 @@ instructions which can be found at {challenge_instructions_url}.</p>
 {scoring_script}</p>
 """
 
-scoring_succeeded_subject_template = "Scored submission to {queue_name}"
+scoring_succeeded_subject_template = "Ran submission to {queue_name}"
 scoring_succeeded_template = """\
 <p>Hello {username},</p>
 
@@ -114,7 +114,7 @@ scoring_succeeded_template = """\
 {scoring_script}</p>
 """
 
-scoring_error_subject_template = "Exception while scoring submission to {queue_name}"
+scoring_error_subject_template = "Error while running submission to {queue_name}"
 scoring_error_template = """\
 <p>Hello {username},</p>
 
