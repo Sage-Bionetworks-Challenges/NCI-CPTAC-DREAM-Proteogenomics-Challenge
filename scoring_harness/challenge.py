@@ -97,8 +97,7 @@ def update_single_submission_status(status, add_annotations, force=False):
     :param:    Annotations that you want to add in dict or submission status annotations format.
                If dict, all submissions will be added as private submissions
     """
-    existingAnnotations = status.get("annotations")
-
+    existingAnnotations = status.get("annotations", dict())
     privateAnnotations = {each['key']:each['value'] for annots in existingAnnotations for each in existingAnnotations[annots] if annots not in ['scopeId','objectId'] and each['isPrivate'] == True}
     publicAnnotations = {each['key']:each['value'] for annots in existingAnnotations for each in existingAnnotations[annots] if annots not in ['scopeId','objectId'] and each['isPrivate'] == False}
 
