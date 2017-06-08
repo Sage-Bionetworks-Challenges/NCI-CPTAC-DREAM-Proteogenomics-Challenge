@@ -126,9 +126,9 @@ def dockerValidate(submission, syn, user, password):
         logFolder = logFolder.id
         for participant in submission.contributors:
             if participant['principalId'] in ADMIN_USER_IDS: 
-                access = ['CREATE', 'READ', 'UPDATE', 'DELETE', 'CHANGE_PERMISSIONS', 'MODERATE', 'CHANGE_SETTINGS']
+                access = ['CREATE', 'READ', 'DOWNLOAD', 'UPDATE', 'DELETE', 'CHANGE_PERMISSIONS', 'MODERATE', 'CHANGE_SETTINGS']
             else:
-                access = ['READ']
+                access = ['READ','DOWNLOAD']
             #Comment set permissions out if you don't want to allow participants to see the pred files
             #syn.setPermissions(predFolder, principalId = participant['principalId'], accessType = access)
             syn.setPermissions(logFolder, principalId = participant['principalId'], accessType = access)
@@ -177,7 +177,7 @@ def dockerRun(submission, scoring_sh, syn, client):
                     #Only store log file if > 0bytes
                     statinfo = os.stat(logFileName)
                     if statinfo.st_size > 0:
-                        ent = File(logFileName, parent = predFolderId)
+                        ent = File(logFileName, parent = logFolderId)
                         logs = syn.store(ent)
             #Remove container and image after being done
             container.remove()
@@ -188,7 +188,7 @@ def dockerRun(submission, scoring_sh, syn, client):
                 logFile.write(errors)
             else:
                 logFile.write("No Logs")
-            ent = File(logFileName, parent = predFolderId)
+            ent = File(logFileName, parent = logFolderId)
             logs = syn.store(ent)    
 
     #Zip up predictions and store it into CHALLENGE_PREDICTIONS_FOLDER
