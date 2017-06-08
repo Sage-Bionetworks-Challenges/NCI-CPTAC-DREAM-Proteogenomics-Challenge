@@ -165,32 +165,32 @@ def dockerRun(submission, scoring_sh, syn, client):
         container = None
         errors = str(e) + "\n"
     #Create log file
-    LogFileName = submission.id + "_log.txt"
-    open(LogFileName,'w+').close()
-    #While docker is still running (the docker python client doesn't update status)
-    if container is not None:
-        while subprocess.Popen(['docker','inspect','-f','{{.State.Running}}',container.name],stdout = subprocess.PIPE).communicate()[0] == "true\n":
-            for line in container.logs(stream=True):
-                with open(LogFileName,'a') as logFile:
+    logFileName = submission.id + "_log.txt"
+    with open(logFileName, 'a') as logFile:
+        #While docker is still running (the docker python client doesn't update status)
+        #Add sleeps
+        if container is not None:
+            #with open(logFileName, 'a') as logFile:
+            while subprocess.Popen(['docker','inspect','-f','{{.State.Running}}',container.name],stdout = subprocess.PIPE).communicate()[0] == "true\n":
+                for line in container.logs(stream=True):
                     logFile.write(line)
-                #Only store log file if > 0bytes
-                statinfo = os.stat(LogFileName)
-                if statinfo.st_size > 0:
-                    ent = File(LogFileName, parent = logFolderId)
-                    logs = syn.store(ent)
-        #Remove container after being done
-        container.remove()
-    #if log file wasn't created, there is an issue
-    if os.stat(LogFileName).st_size == 0:
-        with open(LogFileName, "w") as logfile:
+                    #Only store log file if > 0bytes
+                    statinfo = os.stat(logFileName)
+                    if statinfo.st_size > 0:
+                        ent = File(logFileName, parent = predFolderId)
+                        logs = syn.store(ent)
+            #Remove container and image after being done
+            container.remove()
+            client.images.remove(dockerImage)
+        statinfo = os.stat(logFileName)
+        if statinfo.st_size == 0:
             if errors is not None:
-                logfile.write(errors)
+                logFile.write(errors)
             else:
-                logfile.write("No Logs")
-        ent = File(LogFileName, parent = logFolderId)
-        logs = syn.store(ent)
-    
-    #client.images.remove(dockerRepo)
+                logFile.write("No Logs")
+            ent = File(logFileName, parent = predFolderId)
+            logs = syn.store(ent)    
+
     #Zip up predictions and store it into CHALLENGE_PREDICTIONS_FOLDER
     if len(os.listdir(OUTPUT_DIR)) > 0:
         zipf = zipfile.ZipFile(submission.id + '_predictions.zip', 'w', zipfile.ZIP_DEFLATED)
@@ -201,8 +201,10 @@ def dockerRun(submission, scoring_sh, syn, client):
         predictions = syn.store(ent)
         prediction_synId = predictions.id
         os.system("rm -rf %s/*" % OUTPUT_DIR)
+        os.remove(submission.id + '_predictions.zip')
     else:
         prediction_synId = None
+    os.remove(logFileName)
     return(prediction_synId, logs.id)
 
 
