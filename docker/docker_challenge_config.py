@@ -135,7 +135,7 @@ def dockerValidate(submission, syn, user, password):
     else:
         logFolder = logsSynId[0]      
 
-    return(True, "Your submission has been validated!  As your submission is being scored, please go here: https://www.synapse.org/#!Synapse:%s to check on your log files and resulting prediction files." % predFolder)
+    return(True, "Your submission has been validated!  As your submission is being ran, please go here: https://www.synapse.org/#!Synapse:%s to check on your log file." % logFolder)
 
 
 def dockerRun(submission, scoring_sh, syn, client):
@@ -174,6 +174,7 @@ def dockerRun(submission, scoring_sh, syn, client):
             while subprocess.Popen(['docker','inspect','-f','{{.State.Running}}',container.name],stdout = subprocess.PIPE).communicate()[0] == "true\n":
                 for line in container.logs(stream=True):
                     logFile.write(line)
+                    logFile.flush()
                     #Only store log file if > 0bytes
                     statinfo = os.stat(logFileName)
                     if statinfo.st_size > 0:
@@ -188,6 +189,7 @@ def dockerRun(submission, scoring_sh, syn, client):
                 logFile.write(errors)
             else:
                 logFile.write("No Logs")
+            logFile.flush()
             ent = File(logFileName, parent = logFolderId)
             logs = syn.store(ent)    
 
@@ -236,6 +238,6 @@ def run_docker(evaluation, submission, syn, client):
         #message = "You can find your prediction file here: https://www.synapse.org/#!Synapse:%s" % prediction_synId
         message = "Your prediction file has been stored, but you will not have access to it."
     else:
-        message = "No prediction file generated, please check your log files!"
+        message = "No prediction file generated, please check your log file: https://www.synapse.org/#!Synapse:%s" % log_synId
     return (dict(PREDICTION_FILE=prediction_synId, LOG_FILE = log_synId), message)
 
