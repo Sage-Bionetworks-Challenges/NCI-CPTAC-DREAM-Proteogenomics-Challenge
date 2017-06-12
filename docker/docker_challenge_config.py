@@ -50,6 +50,22 @@ config_evaluations = [
     {
         'id':8720149,
         'score_sh':'/score_sc3.sh'
+    },
+#Proteogenomics Subchallenge 1 Express (9604716)
+#Proteogenomics Subchallenge 2 Express (9604717)
+#Proteogenomics Subchallenge 3 Express (9604718)
+
+    {
+        'id':9604716,
+        'score_sh':'/score_sc1.sh'
+    },
+    {
+        'id':9604717,
+        'score_sh':'/score_sc2.sh'
+    },
+    {
+        'id':9604718,
+        'score_sh':'/score_sc3.sh'
     }
 
 ]
