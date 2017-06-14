@@ -212,7 +212,7 @@ def validate(evaluation, canCancel, dry_run=False):
     print "-" * 60
     sys.stdout.flush()
 
-    for submission, status in syn.getSubmissionBundles(evaluation, status='RECEIVED'):
+    for submission, status in syn.getSubmissionBundles(evaluation, status='ACCEPTED'):
 
         ## refetch the submission so that we get the file path
         ## to be later replaced by a "downloadFiles" flag on getSubmissionBundles
