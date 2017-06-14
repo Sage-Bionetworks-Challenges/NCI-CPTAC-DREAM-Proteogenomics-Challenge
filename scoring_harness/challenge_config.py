@@ -3,7 +3,6 @@ import rpy2.robjects as robjects
 import os
 import zipfile
 import pandas as pd
-
 filePath = os.path.join(os.path.dirname(os.path.abspath(__file__)),'scoring_functions.R')
 robjects.r("source('%s')" % filePath)
 corr_by_row = robjects.r('correlation_by_row')
@@ -57,8 +56,10 @@ def validate_func2(prediction_path, goldstandard_path):
     assert os.stat(prediction_path).st_size > 0, "Prediction file can't be empty"
     pred = pd.read_csv(prediction_path, sep="\t",index_col=0)
     gold = pd.read_csv(goldstandard_path, sep="\t",index_col=0)
-    assert all(pred.index.isin(gold.index)), "All protein ids in the prediction file must be present in the goldstandard file"
-    assert all(gold.columns.isin(pred.columns)), "All sample ids must be predicted for, you are missing: %s" % gold.columns[~gold.columns.isin(pred.columns)]
+    assert all(~pred.index.duplicated()), "There cannot be any duplicated protein ids"
+    assert all(~pred.columns.duplicated()), "There cannot be any duplicated sample ids"
+    assert all(pred.index.isin(gold.index)), "All protein ids in the prediction file must be present in the goldstandard file, you have these: %s" % ",".join(set(pred.index[~pred.index.isin(gold.index)].map(str)))
+    assert all(gold.columns.isin(pred.columns)), "All sample ids must be predicted for, you are missing: %s" % ",".join(gold.columns[~gold.columns.isin(pred.columns)])
     return(True,"Passed Validation")
 
 def score1(prediction_path, goldstandard_path):
