@@ -39,7 +39,7 @@ ADMIN_USER_IDS = [3324230]
 ## every time the script starts and you can link the challenge queues to
 ## the correct scoring/validation functions.  Predictions will be validated and 
 
-def validate_func(submission, goldstandard_path):
+def validate_func(prediction_path, goldstandard_path):
     ##Read in submission (submission.filePath)
     ##Validate submission
     ## MUST USE ASSERTION ERRORS!!! 
@@ -49,19 +49,28 @@ def validate_func(submission, goldstandard_path):
     ## Only assertion errors will be returned to participants, all other errors will be returned to the admin
     return(True,"Passed Validation")
 
-def score1(submission, goldstandard_path):
+def validate_func2(prediction_path, goldstandard_path):
+    assert os.path.isfile(prediction_path), "Submission file must be named predictions.tsv"
+    assert os.stat(prediction_path).st_size > 0, "Prediction file can't be empty"
+    pred = pd.read_csv(prediction_path, sep="\t",index_col=0)
+    gold = pd.read_csv(goldstandard_path, sep="\t",index_col=0)
+    assert all(pred.index.isin(gold.index)), "All protein ids in the prediction file must be present in the goldstandard file"
+    assert all(gold.columns.isin(pred.columns)), "All sample ids must be predicted for, you are missing: %s" % gold.columns[~gold.columns.isin(pred.columns)]
+    return(True,"Passed Validation")
+
+def score1(prediction_path, goldstandard_path):
     ##Read in submission (submission.filePath)
     ##Score against goldstandard
     return(score1, score2, score3)
 
-def score2(submission, goldstandard_path):
+def score2(prediction_path, goldstandard_path):
     ##Read in submission (submission.filePath)
     ##Score against goldstandard
-    corr = corr_by_row(submission.filePath, goldstandard_path)
-    rmse = rmse_by_row(submission.filePath, goldstandard_path)
+    corr = corr_by_row(prediction_path, goldstandard_path)[0]
+    rmse = rmse_by_row(prediction_path, goldstandard_path)[0]
     return(corr, rmse)
 
-def score3(submission, goldstandard_path):
+def score3(prediction_path, goldstandard_path):
     ##Read in submission (submission.filePath)
     ##Score against goldstandard
     return(score1, score2, score3)
@@ -73,20 +82,20 @@ evaluation_queues = [
 # Proteogenomics Subchallenge 3 (8720149)
     {
         'id':8720143,
-        'scoring_func':score1
-        'validation_func':validate_func
+        'scoring_func':score1,
+        'validation_func':validate_func,
         'goldstandard_path':'pros_ova_proteome_sort_common_gene_6577.txt'
     },
     {
         'id':8720145,
-        'scoring_func':score2
-        'validation_func':validate_func
+        'scoring_func':score2,
+        'validation_func':validate_func2,
         'goldstandard_path':'pros_ova_proteome_sort_common_gene_6577.txt'
     },
     {
         'id':8720149,
-        'scoring_func':score3
-        'validation_func':validate_func
+        'scoring_func':score3,
+        'validation_func':validate_func,
         'goldstandard_path':'pros_ova_proteome_sort_common_gene_6577.txt'
     },
 # Proteogenomics Subchallenge 1 Express Lane (9604716)
@@ -94,21 +103,21 @@ evaluation_queues = [
 # Proteogenomics Subchallenge 3 Express Lane (9604718)
     {
         'id':9604716,
-        'scoring_func':score1
-        'validation_func':validate_func
+        'scoring_func':None,
+        'validation_func':validate_func,
         'goldstandard_path':'pros_ova_proteome_sort_common_gene_6577.txt'
 
     },
     {
         'id':9604717,
-        'scoring_func':score2
-        'validation_func':validate_func
+        'scoring_func':None,
+        'validation_func':validate_func2,
         'goldstandard_path':'pros_ova_proteome_sort_common_gene_6577.txt'
     },
     {
         'id':9604718,
-        'scoring_func':score3
-        'validation_func':validate_func
+        'scoring_func':None,
+        'validation_func':validate_func,
         'goldstandard_path':'pros_ova_proteome_sort_common_gene_6577.txt'
 
     }
@@ -148,7 +157,21 @@ def validate_submission(evaluation, submission):
               validation fails or throws exception
     """
     config = evaluation_queue_by_id[int(evaluation.id)]
-    validated, validation_message = config['validation_func'](submission, config['goldstandard_path'])
+    validation_func = config['validation_func']
+
+    status = syn.getSubmissionStatus(submission)
+    #Filter through to fiind PREDICTION_FILE
+    synId = filter(lambda input: input.get('key', None) == "PREDICTION_FILE", status.annotations['stringAnnos'])[0]
+    entity = syn.get(synId['value'])
+
+    dirname = os.path.dirname(entity.path)
+    zfile = zipfile.ZipFile(entity.path)
+
+    for name in zfile.namelist():
+      zfile.extract(name, dirname)
+
+    prediction_path = os.path.join(dirname,'predictions.tsv')
+    results, validation_message = validation_func(prediction_path, config['goldstandard'])
 
     return True, validation_message
 
@@ -161,8 +184,26 @@ def score_submission(evaluation, submission):
               is text for display to user
     """
     config = evaluation_queue_by_id[int(evaluation.id)]
-    score = config['scoring_func'](submission, config['goldstandard_path'])
+    scoring_func = config['scoring_func']
+
+    status = syn.getSubmissionStatus(submission)
+    #Filter through to fiind PREDICTION_FILE
+    synId = filter(lambda input: input.get('key', None) == "PREDICTION_FILE", status.annotations['stringAnnos'])[0]
+    entity = syn.get(synId['value'])
+
+    dirname = entity.cacheDir
+    zfile = zipfile.ZipFile(entity.path)
+
+    for name in zfile.namelist():
+      zfile.extract(name, dirname)
+
+    prediction_path = os.path.join(dirname,'predictions.tsv')
+    if scoring_func is not None:
+        corr, rmse = scoring_func(prediction_path,config['goldstandard'])
     #Make sure to round results to 3 or 4 digits
-    return (dict(score=round(score[0],4), rmse=score[1], auc=score[2]), "You did fine!")
+        return(dict(corr=round(corr,4), rmse=round(rmse,4)), "You submission was scored.\ncorr: %s\nrmse: %s" %(round(corr,4),round(rmse,4)))
+    else:
+        return(dict(), "Your prediction file is in the correct format and can be scored.  Please feel free to submit to the real challenge queues.")
+
 
 
