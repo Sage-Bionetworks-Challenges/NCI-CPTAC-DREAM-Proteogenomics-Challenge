@@ -2,6 +2,7 @@
 import rpy2.robjects as robjects
 import os
 import zipfile
+import pandas as pd
 
 filePath = os.path.join(os.path.dirname(os.path.abspath(__file__)),'scoring_functions.R')
 robjects.r("source('%s')" % filePath)
