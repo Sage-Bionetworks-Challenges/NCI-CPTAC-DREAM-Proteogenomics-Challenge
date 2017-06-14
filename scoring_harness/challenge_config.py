@@ -173,7 +173,7 @@ def validate_submission(syn, evaluation, submission):
       zfile.extract(name, dirname)
 
     prediction_path = os.path.join(dirname,'predictions.tsv')
-    results, validation_message = validation_func(prediction_path, config['goldstandard'])
+    results, validation_message = validation_func(prediction_path, config['goldstandard_path'])
 
     return True, validation_message
 
@@ -201,7 +201,7 @@ def score_submission(syn, evaluation, submission):
 
     prediction_path = os.path.join(dirname,'predictions.tsv')
     if scoring_func is not None:
-        corr, rmse = scoring_func(prediction_path,config['goldstandard'])
+        corr, rmse = scoring_func(prediction_path,config['goldstandard_path'])
     #Make sure to round results to 3 or 4 digits
         return(dict(corr=round(corr,4), rmse=round(rmse,4)), "You submission was scored.\ncorr: %s\nrmse: %s" %(round(corr,4),round(rmse,4)))
     else:
