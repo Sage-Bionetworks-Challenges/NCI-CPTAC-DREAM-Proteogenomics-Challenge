@@ -1,9 +1,10 @@
 # Use rpy2 if you have R scoring functions
-# import rpy2.robjects as robjects
-# import os
-# filePath = os.path.join(os.path.dirname(os.path.abspath(__file__)),'getROC.R')
-# robjects.r("source('%s')" % filePath)
-# AUC_pAUC = robjects.r('GetScores')
+import rpy2.robjects as robjects
+import os
+filePath = os.path.join(os.path.dirname(os.path.abspath(__file__)),'scoring_functions.R')
+robjects.r("source('%s')" % filePath)
+corr_by_row = robjects.r('correlation_by_row')
+rmse_by_row = robjects.r('RMSE_by_row')
 ##-----------------------------------------------------------------------------
 ##
 ## challenge specific code and configuration
@@ -14,14 +15,14 @@
 ## A Synapse project will hold the assetts for your challenge. Put its
 ## synapse ID here, for example
 ## CHALLENGE_SYN_ID = "syn1234567"
-CHALLENGE_SYN_ID = ""
+CHALLENGE_SYN_ID = "syn8228300"
 
 ## Name of your challenge, defaults to the name of the challenge's project
-CHALLENGE_NAME = ""
+CHALLENGE_NAME = "NCI-CPTAC Proteogenomics Challenge"
 
 ## Synapse user IDs of the challenge admins who will be notified by email
 ## about errors in the scoring script
-ADMIN_USER_IDS = []
+ADMIN_USER_IDS = [3324230]
 
 
 ## Each question in your challenge should have an evaluation queue through
@@ -56,20 +57,59 @@ def score1(submission, goldstandard_path):
 def score2(submission, goldstandard_path):
     ##Read in submission (submission.filePath)
     ##Score against goldstandard
+    corr = corr_by_row(submission.filePath, goldstandard_path)
+    rmse = rmse_by_row(submission.filePath, goldstandard_path)
+    return(corr, rmse)
+
+def score3(submission, goldstandard_path):
+    ##Read in submission (submission.filePath)
+    ##Score against goldstandard
     return(score1, score2, score3)
 
 evaluation_queues = [
+
+# Proteogenomics Subchallenge 1 (8720143)
+# Proteogenomics Subchallenge 2 (8720145)
+# Proteogenomics Subchallenge 3 (8720149)
     {
-        'id':1,
+        'id':8720143,
         'scoring_func':score1
         'validation_func':validate_func
-        'goldstandard_path':'path/to/sc1gold.txt'
+        'goldstandard_path':'pros_ova_proteome_sort_common_gene_6577.txt'
     },
     {
-        'id':2,
+        'id':8720145,
         'scoring_func':score2
         'validation_func':validate_func
-        'goldstandard_path':'path/to/sc2gold.txt'
+        'goldstandard_path':'pros_ova_proteome_sort_common_gene_6577.txt'
+    },
+    {
+        'id':8720149,
+        'scoring_func':score3
+        'validation_func':validate_func
+        'goldstandard_path':'pros_ova_proteome_sort_common_gene_6577.txt'
+    },
+# Proteogenomics Subchallenge 1 Express Lane (9604716)
+# Proteogenomics Subchallenge 2 Express Lane (9604717)
+# Proteogenomics Subchallenge 3 Express Lane (9604718)
+    {
+        'id':9604716,
+        'scoring_func':score1
+        'validation_func':validate_func
+        'goldstandard_path':'pros_ova_proteome_sort_common_gene_6577.txt'
+
+    },
+    {
+        'id':9604717,
+        'scoring_func':score2
+        'validation_func':validate_func
+        'goldstandard_path':'pros_ova_proteome_sort_common_gene_6577.txt'
+    },
+    {
+        'id':9604718,
+        'scoring_func':score3
+        'validation_func':validate_func
+        'goldstandard_path':'pros_ova_proteome_sort_common_gene_6577.txt'
 
     }
 ]
