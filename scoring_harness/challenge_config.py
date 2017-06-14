@@ -149,7 +149,7 @@ for q in evaluation_queues:
 leaderboard_tables = {}
 
 
-def validate_submission(evaluation, submission):
+def validate_submission(syn, evaluation, submission):
     """
     Find the right validation function and validate the submission.
 
@@ -176,7 +176,7 @@ def validate_submission(evaluation, submission):
     return True, validation_message
 
 
-def score_submission(evaluation, submission):
+def score_submission(syn, evaluation, submission):
     """
     Find the right scoring function and score the submission
 

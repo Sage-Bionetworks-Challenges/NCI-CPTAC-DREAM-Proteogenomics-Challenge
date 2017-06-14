@@ -220,7 +220,7 @@ def validate(evaluation, canCancel, dry_run=False):
         ex1 = None #Must define ex1 in case there is no error
         print "validating", submission.id, submission.name
         try:
-            is_valid, validation_message = conf.validate_submission(evaluation, submission)
+            is_valid, validation_message = conf.validate_submission(syn, evaluation, submission)
         except Exception as ex1:
             is_valid = False
             print "Exception during validation:", type(ex1), ex1, ex1.message
@@ -284,7 +284,7 @@ def score(evaluation, canCancel, dry_run=False):
         submission = syn.getSubmission(submission)
 
         try:
-            score, message = conf.score_submission(evaluation, submission)
+            score, message = conf.score_submission(syn, evaluation, submission)
 
             print "scored:", submission.id, submission.name, submission.userId, score
 
