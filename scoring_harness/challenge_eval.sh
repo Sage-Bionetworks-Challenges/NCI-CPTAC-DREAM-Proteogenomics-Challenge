@@ -1,6 +1,6 @@
 # Automation of validation and scoring
 # Make sure you point to the directory where challenge.py belongs and a log directory must exist for the output
-cd ./
+cd ~/NCI-CPTAC-Challenge/scoring_harness
 #---------------------
 #Validate submissions
 #---------------------
