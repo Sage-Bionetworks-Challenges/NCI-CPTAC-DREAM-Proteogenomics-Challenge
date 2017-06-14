@@ -5,9 +5,9 @@ cd ~/NCI-CPTAC-Challenge/scoring_harness
 #Validate submissions
 #---------------------
 #Remove --send-messages to do rescoring without sending emails to participants
-python challenge.py -u "Proteogenomics" --send-messages --notifications validate --all >> log/score.log 2>&1
+python challenge.py -u "Proteogenomics" --send-messages --notifications validate --all >> ~/log/score.log 2>&1
 
 #--------------------
 #Score submissions
 #--------------------
-python challenge.py -u "Proteogenomics" --send-messages --notifications score --all >> log/score.log 2>&1
+python challenge.py -u "Proteogenomics" --send-messages --notifications score --all >> ~/log/score.log 2>&1
