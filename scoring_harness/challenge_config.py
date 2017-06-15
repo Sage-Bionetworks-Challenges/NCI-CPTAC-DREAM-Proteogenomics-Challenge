@@ -41,14 +41,18 @@ ADMIN_USER_IDS = [3324230]
 ## every time the script starts and you can link the challenge queues to
 ## the correct scoring/validation functions.  Predictions will be validated and 
 
-def validate_func(prediction_path, goldstandard_path):
-    ##Read in submission (submission.filePath)
-    ##Validate submission
-    ## MUST USE ASSERTION ERRORS!!! 
-    ##eg.
-    ## assert os.path.basename(submission.filePath) == "prediction.tsv", "Submission file must be named prediction.tsv"
-    ## or raise AssertionError()...
-    ## Only assertion errors will be returned to participants, all other errors will be returned to the admin
+def validate_func1(prediction_path, goldstandard_path):
+    assert os.path.isfile(prediction_path), "Submission file must be named predictions.tsv"
+    assert os.stat(prediction_path).st_size > 0, "Prediction file can't be empty"
+    pred = pd.read_csv(prediction_path, sep="\t",index_col=0)
+    gold = pd.read_csv(goldstandard_path, sep="\t",index_col=0)
+
+    assert all(~pred.index.duplicated()), "There cannot be any duplicated protein ids"
+    assert all(~pred.columns.duplicated()), "There cannot be any duplicated sample ids"
+    assert all(pred.index.isin(gold.index)), "All protein ids in the prediction file must be present in the goldstandard file, you have these: %s" % ",".join(set(pred.index[~pred.index.isin(gold.index)].map(str)))
+    assert all(gold.columns.isin(pred.columns)), "All sample ids must be predicted for, you are missing: %s" % ",".join(gold.columns[~gold.columns.isin(pred.columns)])
+    assert all(~pred.isnull()), "There can't be any null values"
+
     return(True,"Passed Validation")
 
 def validate_func2(prediction_path, goldstandard_path):
@@ -60,6 +64,8 @@ def validate_func2(prediction_path, goldstandard_path):
     assert all(~pred.columns.duplicated()), "There cannot be any duplicated sample ids"
     assert all(pred.index.isin(gold.index)), "All protein ids in the prediction file must be present in the goldstandard file, you have these: %s" % ",".join(set(pred.index[~pred.index.isin(gold.index)].map(str)))
     assert all(gold.columns.isin(pred.columns)), "All sample ids must be predicted for, you are missing: %s" % ",".join(gold.columns[~gold.columns.isin(pred.columns)])
+    assert all(~pred.isnull()), "There can't be any null values"
+
     return(True,"Passed Validation")
 
 def score1(prediction_path, goldstandard_path):
