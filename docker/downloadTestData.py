@@ -5,7 +5,7 @@ import shutil
 
 def main():
 	parser = argparse.ArgumentParser()
-	parser.add_arguemnt('sc',help="subchallenge",choices=['sc1','sc2','sc3'])
+	parser.add_argument('sc',help="subchallenge",choices=['sc1','sc2','sc3'])
 	parser.add_argument("--express", help="Express lane", action="store_true", default=False)
 	args = parser.parse_args()
 	syn = synapseclient.login()
