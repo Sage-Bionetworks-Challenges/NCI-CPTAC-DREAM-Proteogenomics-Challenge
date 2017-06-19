@@ -13,6 +13,7 @@ def main():
 	
 	if not os.path.exists(testDataDir):
 		os.mkdir(testDataDir)
+	os.system("rm -f %s/*" % testDataDir)
 	# cna = syn.get("syn10067991")
 	# if args.sc in ['sc1', 'sc2']:
 	# 	proteome = syn.get("syn10134684")
