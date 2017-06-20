@@ -14,17 +14,14 @@ CHALLENGE_SYN_ID = "syn8228304"
 CHALLENGE_LOG_FOLDER = "syn9771357"
 CHALLENGE_PREDICTION_FOLDER = "syn8729051"
 #These are the volumes that you want to mount onto your docker container
-OUTPUT_DIR = '/home/ubuntu/output'
-TESTDATA_DIR = '/home/ubuntu/evaluation_data'
-TRAINING_DIR = '/home/ubuntu/training_data'
-
+OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),'output')
+TESTDATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),'evaluation_data')
 #These are the locations on the docker that you want your mounted volumes to be + permissions in docker (ro, rw)
 #It has to be in this format '/output:rw'
 MOUNTED_VOLUMES = {OUTPUT_DIR:'/output:rw',
-                   TESTDATA_DIR:'/evaluation_data:ro',
-                   TRAINING_DIR:'/training_data:ro'}
+                   TESTDATA_DIR:'/evaluation_data:ro'}
 #All mounted volumes here in a list
-ALL_VOLUMES = [OUTPUT_DIR,TESTDATA_DIR,TRAINING_DIR]
+ALL_VOLUMES = [OUTPUT_DIR,TESTDATA_DIR]
 
 ## Name of your challenge, defaults to the name of the challenge's project
 CHALLENGE_NAME = "NCI-CPTAC DREAM Proteogenomics Challenge"
