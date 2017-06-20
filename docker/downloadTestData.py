@@ -9,11 +9,11 @@ def main():
 	parser.add_argument("--express", help="Express lane", action="store_true", default=False)
 	args = parser.parse_args()
 	syn = synapseclient.login()
-	testDataDir = os.path.join(os.getenv("HOME"),"evaluation_data")
+	downloadDir = os.path.dirname(os.path.abspath(__file__))
+	testDataDir = os.path.join(downloadDir,"evaluation_data")
 	
 	if not os.path.exists(testDataDir):
 		os.mkdir(testDataDir)
-	os.system("rm -f %s/*" % testDataDir)
 	# cna = syn.get("syn10067991")
 	# if args.sc in ['sc1', 'sc2']:
 	# 	proteome = syn.get("syn10134684")
