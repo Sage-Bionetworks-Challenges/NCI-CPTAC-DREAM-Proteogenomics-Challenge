@@ -1,13 +1,15 @@
 # Automation of validation and scoring
-# Make sure you point to the directory where challenge.py belongs and a log directory must exist for the output
-cd ~/NCI-CPTAC-Challenge/scoring_harness
+script_dir=$(dirname $0)
+if [ ! -d "$script_dir/log" ]; then
+  mkdir $script_dir/log
+fi
 #---------------------
 #Validate submissions
 #---------------------
 #Remove --send-messages to do rescoring without sending emails to participants
-python challenge.py -u "Proteogenomics" --send-messages --notifications validate --all >> ~/log/score.log 2>&1
+python $script_dir/challenge.py -u "Proteogenomics" --send-messages --notifications validate --all >> $script_dir/log/score.log 2>&1
 
 #--------------------
 #Score submissions
 #--------------------
-python challenge.py -u "Proteogenomics" --send-messages --notifications score --all >> ~/log/score.log 2>&1
+python $script_dir/challenge.py -u "Proteogenomics" --send-messages --notifications score --all >> $script_dir/log/score.log 2>&1
