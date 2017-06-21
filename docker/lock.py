@@ -29,7 +29,7 @@ class Lock(object):
     def __init__(self, name, dir=None, max_age=LOCK_DEFAULT_MAX_AGE):
         self.name = name
         self.held = False
-        self.dir = dir if dir else os.getcwd()
+        self.dir = dir if dir else os.path.dirname(os.path.abspath(__file__))
         self.lock_dir_path = os.path.join(self.dir, ".".join([name, Lock.SUFFIX]))
         self.max_age = max_age
 
