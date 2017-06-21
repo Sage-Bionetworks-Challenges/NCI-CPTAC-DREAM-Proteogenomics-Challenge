@@ -686,7 +686,7 @@ def main():
             args.user = os.environ.get('SYNAPSE_USER', None)
         if not args.password:
             args.password = os.environ.get('SYNAPSE_PASSWORD', None)
-        syn.login(email=args.user, password=args.password)
+        syn.login()
 
         ## initialize messages
         messages.syn = syn
