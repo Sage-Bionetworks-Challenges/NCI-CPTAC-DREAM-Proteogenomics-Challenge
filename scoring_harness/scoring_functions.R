@@ -34,7 +34,7 @@ NRMSE_by_row <- function(pred_path, truth_path)  {
   nrmse_vec <- c()
   for(i in 1:length(mat1[ ,1]) ) {
     temp <- hydroGOF::rmse(mat1[ i, ], mat2[ i , ])
-    nrmse_vec <- c(nrmse_vec , temp/(max(mat2)-min(mat2)))
+    nrmse_vec <- c(nrmse_vec , temp/(max(mat2,na.rm = T)-min(mat2,na.rm = T)))
   }
   names(nrmse_vec) <- rownames(mat1)
   return(mean(nrmse_vec))
