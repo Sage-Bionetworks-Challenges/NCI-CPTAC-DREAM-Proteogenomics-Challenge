@@ -117,7 +117,7 @@ def dockerValidate(submission, syn, user, password):
     #Must check docker image size
     #Synapse docker registry
     dockerSize = sum([layer['size'] for layer in resp.json()['layers']])
-    assert dockerSize/1000000 < 1000, "Docker image must be less than a teribyte"
+    assert dockerSize/1000000000.0 < 1000, "Docker image must be less than a teribyte"
 
     #Send email to me if harddrive is full 
     #should be stateless, if there needs to be code changes to the docker agent
