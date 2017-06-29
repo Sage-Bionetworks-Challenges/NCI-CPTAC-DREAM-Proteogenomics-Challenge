@@ -1,6 +1,31 @@
+##SC1
+
+score.nrmsd = function(pred_path, observed_path, truth_path) {
+  d.predict = as.matrix(read.table( pred_path, sep="\t"));
+  d.true = as.matrix(read.table( truth_path, sep="\t"));
+  missing.ind = is.na(as.matrix(read.table( observed_path, sep="\t")));
+  
+  diff.true = apply(d.true, 1, function(x){diff(range(x[x>0]))});
+  d.predict[!missing.ind]= NA;
+  nrmsd = sqrt(apply((d.predict-d.true)^2,1,mean,na.rm=T))/diff.true;
+  return(mean(nrmsd));
+}
+
+score.cor = function(pred_path, observed_path, truth_path) {
+  d.predict = as.matrix(read.table( pred_path, sep="\t"));
+  d.true = as.matrix(read.table( truth_path, sep="\t"));
+  missing.ind = is.na(as.matrix(read.table( observed_path, sep="\t")));
+  
+  L = dim(d.true)[1]
+  d.predict[!missing.ind]= NA;
+  cor.p = sapply(1:L,function(l){cor(d.predict[l,],d.true[l,],use = 'pairwise.complete.obs')});
+  return(mean(cor.p));
+}
+
+###SC2 and SC3
 
 ################################## load pearson correlation function ##################################
-correlation_by_row <- function(pred_path, truth_path)  {
+correlation_by_row <- function(pred_path, truth_path) {
   prediction <- read.csv( pred_path, row.names = 1 , check.names = F, sep="\t") 
   test_prot  <- read.csv( truth_path, row.names = 1 , check.names = F, sep="\t")
   common_protein <- intersect(rownames(prediction), rownames(test_prot))
@@ -22,7 +47,7 @@ correlation_by_row <- function(pred_path, truth_path)  {
 #result_corr <- correlation_by_row("predictions.tsv", "pros_ova_proteome_sort_common_gene_6577.txt")
 
 ########################################## load NRMSE function #########################################
-NRMSE_by_row <- function(pred_path, truth_path)  {
+NRMSE_by_row <- function(pred_path, truth_path) {
   suppressPackageStartupMessages(library(hydroGOF))
   prediction <- read.csv( pred_path, row.names = 1 , check.names = F, sep="\t") 
   test_prot  <- read.csv( truth_path, row.names = 1 , check.names = F, sep="\t")
