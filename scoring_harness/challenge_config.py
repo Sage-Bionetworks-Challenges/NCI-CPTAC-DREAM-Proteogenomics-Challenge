@@ -94,19 +94,19 @@ evaluation_queues = [
         'id':8720143,
         'scoring_func':score1,
         'validation_func':validate_func1,
-        'goldstandard_path':'pros_ova_proteome_sort_common_gene_6577.txt'
+        'goldstandard_path':'data_test_true.txt'
     },
     {
         'id':8720145,
         'scoring_func':score2,
         'validation_func':validate_func2,
-        'goldstandard_path':'pros_ova_proteome_sort_common_gene_6577.txt'
+        'goldstandard_path':'rescaled_prospective_ova_proteome_filtered_5820.txt'
     },
     {
         'id':8720149,
         'scoring_func':score3,
         'validation_func':validate_func2,
-        'goldstandard_path':'pros_ova_proteome_sort_common_gene_6577.txt'
+        'goldstandard_path':'Noneyet'
     },
 # Proteogenomics Subchallenge 1 Express Lane (9604716)
 # Proteogenomics Subchallenge 2 Express Lane (9604717)
@@ -115,20 +115,20 @@ evaluation_queues = [
         'id':9604716,
         'scoring_func':None,
         'validation_func':validate_func1,
-        'goldstandard_path':'pros_ova_proteome_sort_common_gene_6577.txt'
+        'goldstandard_path':'data_test_true.txt'
 
     },
     {
         'id':9604717,
         'scoring_func':None,
         'validation_func':validate_func2,
-        'goldstandard_path':'pros_ova_proteome_sort_common_gene_6577.txt'
+        'goldstandard_path':'rescaled_prospective_ova_proteome_filtered_5820.txt'
     },
     {
         'id':9604718,
         'scoring_func':None,
         'validation_func':validate_func2,
-        'goldstandard_path':'pros_ova_proteome_sort_common_gene_6577.txt'
+        'goldstandard_path':'Noneyet'
 
     }
 ]
