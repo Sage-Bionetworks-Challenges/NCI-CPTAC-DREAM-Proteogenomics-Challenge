@@ -6,7 +6,7 @@ import pandas as pd
 filePath = os.path.join(os.path.dirname(os.path.abspath(__file__)),'scoring_functions.R')
 robjects.r("source('%s')" % filePath)
 corr_by_row = robjects.r('correlation_by_row')
-rmse_by_row = robjects.r('RMSE_by_row')
+rmse_by_row = robjects.r('NRMSE_by_row')
 ##-----------------------------------------------------------------------------
 ##
 ## challenge specific code and configuration
