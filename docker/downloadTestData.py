@@ -3,7 +3,7 @@ import argparse
 import os
 import shutil
 
-def downloadData(parentId, testDataDir):
+def downloadData(syn, parentId, testDataDir):
 	download = syn.getChildren(parentId)
 	for i in download:
 		temp = syn.get(i['id'])
@@ -22,13 +22,13 @@ def main():
 		os.mkdir(testDataDir)
 
 	if args.sc == 'sc1':
-		downloadData("syn10164401",testDataDir)
+		downloadData(syn, "syn10164401",testDataDir)
 	elif args.sc == 'sc2':
-		downloadData("syn10139559",testDataDir)
-		downloadData("syn10139560",testDataDir)
+		downloadData(syn, "syn10139559",testDataDir)
+		downloadData(syn, "syn10139560",testDataDir)
 	else:
-		downloadData("syn10139567",testDataDir)
-		downloadData("syn10139568",testDataDir)
+		downloadData(syn, "syn10139567",testDataDir)
+		downloadData(syn, "syn10139568",testDataDir)
 
 	# if args.express:
 	# 	shutil.copy(cna.path, testDataDir)
