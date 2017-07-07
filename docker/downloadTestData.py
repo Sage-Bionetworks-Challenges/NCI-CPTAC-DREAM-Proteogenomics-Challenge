@@ -21,9 +21,8 @@ def main():
 	if not os.path.exists(testDataDir):
 		os.mkdir(testDataDir)
 
-	cna = syn.get("syn9974010")
 	if args.sc == 'sc1':
-		downloadData("syn10139556",testDataDir)
+		downloadData("syn10164401",testDataDir)
 	elif args.sc == 'sc2':
 		downloadData("syn10139559",testDataDir)
 		downloadData("syn10139560",testDataDir)
@@ -31,14 +30,14 @@ def main():
 		downloadData("syn10139567",testDataDir)
 		downloadData("syn10139568",testDataDir)
 
-	if args.express:
-		shutil.copy(cna.path, testDataDir)
-		shutil.copy(proteome.path, "%s/pros_ova_proteome_sort_common_gene_6577.txt" % testDataDir)
-		shutil.copy(rna.path, testDataDir)
-	else:
-		shutil.copy(cna.path, testDataDir)
-		shutil.copy(proteome.path,  "%s/pros_ova_proteome_sort_common_gene_6577.txt" % testDataDir)
-		shutil.copy(rna.path, testDataDir)
+	# if args.express:
+	# 	shutil.copy(cna.path, testDataDir)
+	# 	shutil.copy(proteome.path, "%s/pros_ova_proteome_sort_common_gene_6577.txt" % testDataDir)
+	# 	shutil.copy(rna.path, testDataDir)
+	# else:
+	# 	shutil.copy(cna.path, testDataDir)
+	# 	shutil.copy(proteome.path,  "%s/pros_ova_proteome_sort_common_gene_6577.txt" % testDataDir)
+	# 	shutil.copy(rna.path, testDataDir)
 
 
 if __name__ == '__main__':
