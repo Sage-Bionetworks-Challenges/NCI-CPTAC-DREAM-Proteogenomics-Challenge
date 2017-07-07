@@ -3,6 +3,12 @@ import argparse
 import os
 import shutil
 
+def downloadData(parentId, testDataDir):
+	download = syn.getChildren(parentId)
+	for i in download:
+		temp = syn.get(i['id'])
+		shutil.copy(temp.path, "%s/%s" % (testDataDir, os.path.basename(temp.path)))
+
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('sc',help="subchallenge",choices=['sc1','sc2','sc3'])
@@ -14,28 +20,16 @@ def main():
 	
 	if not os.path.exists(testDataDir):
 		os.mkdir(testDataDir)
-	# cna = syn.get("syn10067991")
-	# if args.sc in ['sc1', 'sc2']:
-	# 	proteome = syn.get("syn10134684")
-	# else:
-	# 	proteome = syn.get("syn10067993")
-	# rna = syn.get("syn10067992")
-
-	# if args.express:
-	# 	shutil.copy(cna.path, testDataDir)
-	# 	shutil.copy(proteome.path, "%s/pros_ova_proteome_sort_all_gene.txt" % testDataDir)
-	# 	shutil.copy(rna.path, testDataDir)
-	# else:
-	# 	shutil.copy(cna.path, testDataDir)
-	# 	shutil.copy(proteome.path,  "%s/pros_ova_proteome_sort_all_gene.txt" % testDataDir)
-	# 	shutil.copy(rna.path, testDataDir)
 
 	cna = syn.get("syn9974010")
-	if args.sc in ['sc1', 'sc2']:
-		proteome = syn.get("syn10134685")
+	if args.sc == 'sc1':
+		downloadData("syn10139556",testDataDir)
+	elif args.sc == 'sc2':
+		downloadData("syn10139559",testDataDir)
+		downloadData("syn10139560",testDataDir)
 	else:
-		proteome = syn.get("syn9974009")
-	rna = syn.get("syn9974005")
+		downloadData("syn10139567",testDataDir)
+		downloadData("syn10139568",testDataDir)
 
 	if args.express:
 		shutil.copy(cna.path, testDataDir)
