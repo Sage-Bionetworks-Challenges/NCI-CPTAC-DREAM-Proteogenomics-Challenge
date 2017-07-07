@@ -11,18 +11,14 @@ def downloadData(syn, parentId, testDataDir):
 
 def main():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('sc',help="subchallenge",choices=['sc1','sc2','sc3'])
 	parser.add_argument("--express", help="Express lane", action="store_true", default=False)
 	args = parser.parse_args()
 	syn = synapseclient.login()
 	downloadDir = os.path.dirname(os.path.abspath(__file__))
-
-	if args.sc == 'sc1':
-		downloadData(syn, "syn10165897",downloadDir)
-	elif args.sc == 'sc2':
-		downloadData(syn, "syn10165898",downloadDir)
-	else:
-		downloadData(syn, "syn10165900",downloadDir)
+	
+	downloadData(syn, "syn10165897",downloadDir)
+	downloadData(syn, "syn10165898",downloadDir)
+	downloadData(syn, "syn10165900",downloadDir)
 
 	# if args.express:
 	# 	shutil.copy(cna.path, testDataDir)
