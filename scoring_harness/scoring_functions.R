@@ -52,8 +52,8 @@ NRMSE_by_row <- function(pred_path, truth_path) {
   prediction <- read.csv( pred_path, row.names = 1 , check.names = F, sep="\t") 
   test_prot  <- read.csv( truth_path, row.names = 1 , check.names = F, sep="\t")
   common_protein <- intersect(rownames(prediction), rownames(test_prot))
-  prediction <- prediction[common_protein ,]
-  test_prot <- test_prot[common_protein ,]
+  prediction <- prediction[common_protein, colnames(test_prot)]
+  test_prot <- test_prot[common_protein, colnames(test_prot)]
   mat1 <- as.matrix(prediction)
   mat2 <- as.matrix(test_prot) 
   nrmse_vec <- c()

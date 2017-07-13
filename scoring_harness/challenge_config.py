@@ -6,7 +6,10 @@ import pandas as pd
 filePath = os.path.join(os.path.dirname(os.path.abspath(__file__)),'scoring_functions.R')
 robjects.r("source('%s')" % filePath)
 corr_by_row = robjects.r('correlation_by_row')
-rmse_by_row = robjects.r('NRMSE_by_row')
+nrmse_by_row = robjects.r('NRMSE_by_row')
+
+sc1_nrmsd = robjects.r('score.nrmsd')
+sc1_corr = robjects.r('score.cor')
 ##-----------------------------------------------------------------------------
 ##
 ## challenge specific code and configuration
@@ -41,59 +44,56 @@ ADMIN_USER_IDS = [3324230]
 ## every time the script starts and you can link the challenge queues to
 ## the correct scoring/validation functions.  Predictions will be validated and 
 
-def validate_func1_helper(df):
-    
-    
-def validate_func1(dirName, goldstandard_path):
-    gold = pd.read_csv(goldstandard_path, sep="\t",index_col=0)
+def _validate_func_helper(filePath, goldDf, predOrConf, column="proteinID"):
+    fileName = os.path.basename(filePath)
+    assert os.path.isfile(filePath), "%s file must be named %s, and your model must generate %s_{1..100}.tsv" % (predOrConf, fileName, predOrConf)
+    assert os.stat(filePath).st_size > 0, "%s: Can't be an empty file" % fileName
+    fileDf = pd.read_csv(filePath, sep="\t")
+    assert fileDf.get(column) is not None, "%s: Must contain proteinID column" % fileName
+    fileDf.index = fileDf[column]
+    del fileDf[column]
+    assert all(~fileDf.index.duplicated()), "%s: There cannot be any duplicated protein ids" % fileName
+    assert all(~fileDf.columns.duplicated()), "%s: There cannot be any duplicated sample ids" % fileName
+    assert all(goldDf.index.isin(fileDf.index)), "%s: All protein Ids in the goldstandard must also be in your file. You are missing: %s" % (fileName, ",".join(set(goldDf.index[~fileDf.index.isin(goldDf.index)].map(str))))
+    assert all(goldDf.columns.isin(fileDf.columns)), "%s: All sample Ids in the goldstandard must also be in your file. You are missing: %s" % (fileName, ",".join(goldDf.columns[~goldDf.columns.isin(fileDf.columns)]))
+    assert all(~fileDf.isnull()), "%s: There can't be any null values" % fileName
+
+def validate_func1(dirName, goldstandard_path, column):
+    goldDf = pd.read_csv(goldstandard_path, sep="\t",index_col=0)
     for num in range(1,101):
         prediction_path = os.path.join(dirName,'predictions_%d.tsv' % num)
         confidence_path = os.path.join(dirName,'confidence_%d.tsv' % num)
-
-        assert os.path.isfile(prediction_path), "Predictions file must be named predictions_%d.tsv, and your model must generate predictions_{1..100}.tsv" % num
-        assert os.path.isfile(confidence_path), "Confidence file must be named confidence_%d.tsv, and your model must generate confidence_{1..100}.tsv" % num
-        assert os.stat(prediction_path).st_size > 0, "predictions_%d.tsv can't be empty" % num
-        assert os.stat(confidence_path).st_size > 0, "confidence_%d.tsv file can't be empty" % num
-        pred = pd.read_csv(prediction_path, sep="\t")
-        conf = pd.read_csv(confidence_path, sep="\t")
-
-        assert pred.get('proteinID') is not None, "predictions_%d.tsv must contain proteinID column"
-        assert conf.get('proteinID') is not None, "predictions_%d.tsv must contain proteinID column"
-        pred.index= pred.proteinID
-        conf.index = pred.proteinID
-        assert all(~pred.index.duplicated()), "There cannot be any duplicated protein ids"
-        assert all(~pred.columns.duplicated()), "There cannot be any duplicated sample ids"
-        assert all(pred.index.isin(gold.index)), "All protein ids in the prediction file must be present in the goldstandard file, you have these: %s" % ",".join(set(pred.index[~pred.index.isin(gold.index)].map(str)))
-        assert all(gold.columns.isin(pred.columns)), "All sample ids must be predicted for, you are missing: %s" % ",".join(gold.columns[~gold.columns.isin(pred.columns)])
-        assert all(~pred.isnull()), "There can't be any null values"
-
-        return(True,"Passed Validation")
-
-def validate_func2_3(dirName, goldstandard_path):
-    prediction_path = os.path.join(dirName,'predictions.tsv')
-
-    assert os.path.isfile(prediction_path), "Submission file must be named predictions.tsv"
-    assert os.stat(prediction_path).st_size > 0, "Prediction file can't be empty"
-    pred = pd.read_csv(prediction_path, sep="\t",index_col=0)
-    gold = pd.read_csv(goldstandard_path, sep="\t",index_col=0)
-    assert all(~pred.index.duplicated()), "There cannot be any duplicated protein ids"
-    assert all(~pred.columns.duplicated()), "There cannot be any duplicated sample ids"
-    assert all(pred.index.isin(gold.index)), "All protein ids in the prediction file must be present in the goldstandard file, you have these: %s" % ",".join(set(pred.index[~pred.index.isin(gold.index)].map(str)))
-    assert all(gold.columns.isin(pred.columns)), "All sample ids must be predicted for, you are missing: %s" % ",".join(gold.columns[~gold.columns.isin(pred.columns)])
-    assert all(~pred.isnull()), "There can't be any null values"
-
+        _validate_func_helper(prediction_path, goldDf, "predictions")
+        _validate_func_helper(confidence_path, goldDf, "confidence")
     return(True,"Passed Validation")
 
-def score1(prediction_path, goldstandard_path):
-    ##Read in submission (submission.filePath)
-    ##Score against goldstandard
-    return(score1, score2, score3)
+def validate_func2_3(dirName, goldstandard_path, column):
+    prediction_path = os.path.join(dirName,'predictions.tsv')
+    confidence_path = os.path.join(dirName,'confidence.tsv')
+    _validate_func_helper(prediction_path, goldDf, "predictions", column=column)
+    _validate_func_helper(confidence_path, goldDf, "confidence", column=column)
+    return(True,"Passed Validation")
 
-def score2_3(prediction_path, goldstandard_path):
+def score1(dirName, goldstandard_path):
     ##Read in submission (submission.filePath)
     ##Score against goldstandard
+
+    sc1_nrmsd_scores = []
+    sc1_corr_scores = []
+    for num in range(1,101):
+        prediction_path = os.path.join(dirName,'predictions_%d.tsv' % num)
+        nrmse = sc1_nrmsd(prediction_path, obs_path, goldstandard_path)[0]
+        corr = sc1_corr(prediction_path, obs_path, goldstandard_path)[0]
+        sc1_nrmsd_scores.append(nrmse)
+        sc1_corr_scores.append(corr)
+    return(sc1_nrmsd_scores[0], sc1_corr_scores[0])
+
+def score2_3(dirName, goldstandard_path):
+    ##Read in submission (submission.filePath)
+    ##Score against goldstandard
+    prediction_path = os.path.join(dirName,'predictions.tsv')
     corr = corr_by_row(prediction_path, goldstandard_path)[0]
-    rmse = rmse_by_row(prediction_path, goldstandard_path)[0]
+    rmse = nrmse_by_row(prediction_path, goldstandard_path)[0]
     return(corr, rmse)
 
 evaluation_queues = [
@@ -105,18 +105,21 @@ evaluation_queues = [
         'id':8720143,
         'scoring_func':score1,
         'validation_func':validate_func1,
+        'column':'proteinID',
         'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'data_test_true.txt')
     },
     {
         'id':8720145,
         'scoring_func':score2_3,
-        'validation_func':validate_func2,
+        'validation_func':validate_func2_3,
+        'column':'proteinID',
         'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'rescaled_prospective_ova_proteome_filtered_5820.txt')
     },
     {
         'id':8720149,
         'scoring_func':score2_3,
-        'validation_func':validate_func2,
+        'validation_func':validate_func2_3,
+        'column':'phosphoID',
         'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'Noneyet')
     },
 # Proteogenomics Subchallenge 1 Express Lane (9604716)
@@ -126,6 +129,7 @@ evaluation_queues = [
         'id':9604716,
         'scoring_func':None,
         'validation_func':validate_func1,
+        'column':'proteinID',
         'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'data_test_true.txt')
 
     },
@@ -133,12 +137,14 @@ evaluation_queues = [
         'id':9604717,
         'scoring_func':None,
         'validation_func':validate_func2,
+        'column':'proteinID',
         'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'rescaled_prospective_ova_proteome_filtered_5820.txt')
     },
     {
         'id':9604718,
         'scoring_func':None,
         'validation_func':validate_func2,
+        'column':'phosphoID',
         'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'Noneyet')
 
     }
@@ -191,7 +197,7 @@ def validate_submission(syn, evaluation, submission):
     for name in zfile.namelist():
       zfile.extract(name, dirname)
 
-    results, validation_message = validation_func(dirname, config['goldstandard_path'])
+    results, validation_message = validation_func(dirname, config['goldstandard_path'], config['column'])
 
     return True, validation_message
 
@@ -217,9 +223,9 @@ def score_submission(syn, evaluation, submission):
     for name in zfile.namelist():
       zfile.extract(name, dirname)
 
-    prediction_path = os.path.join(dirname,'predictions.tsv')
+
     if scoring_func is not None:
-        corr, rmse = scoring_func(prediction_path,config['goldstandard_path'])
+        corr, rmse = scoring_func(dirname,config['goldstandard_path'])
     #Make sure to round results to 3 or 4 digits
         return(dict(corr=round(corr,4), rmse=round(rmse,4)), "You submission was scored.\ncorr: %s\nrmse: %s" %(round(corr,4),round(rmse,4)))
     else:
