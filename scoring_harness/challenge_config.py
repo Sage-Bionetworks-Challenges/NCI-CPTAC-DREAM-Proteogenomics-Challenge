@@ -136,14 +136,14 @@ evaluation_queues = [
     {
         'id':9604717,
         'scoring_func':None,
-        'validation_func':validate_func2,
+        'validation_func':validate_func2_3,
         'column':'proteinID',
         'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'rescaled_prospective_ova_proteome_filtered_5820.txt')
     },
     {
         'id':9604718,
         'scoring_func':None,
-        'validation_func':validate_func2,
+        'validation_func':validate_func2_3,
         'column':'phosphoID',
         'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'Noneyet')
 
