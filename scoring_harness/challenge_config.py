@@ -68,6 +68,7 @@ def validate_func1(dirName, goldstandard_path, column):
     return(True,"Passed Validation")
 
 def validate_func2_3(dirName, goldstandard_path, column):
+    goldDf = pd.read_csv(goldstandard_path, sep="\t",index_col=0)
     prediction_path = os.path.join(dirName,'predictions.tsv')
     confidence_path = os.path.join(dirName,'confidence.tsv')
     _validate_func_helper(prediction_path, goldDf, "predictions", column=column)
@@ -77,7 +78,6 @@ def validate_func2_3(dirName, goldstandard_path, column):
 def score1(dirName, goldstandard_path):
     ##Read in submission (submission.filePath)
     ##Score against goldstandard
-
     sc1_nrmsd_scores = []
     sc1_corr_scores = []
     for num in range(1,101):
