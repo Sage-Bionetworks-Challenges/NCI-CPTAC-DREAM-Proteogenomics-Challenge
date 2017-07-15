@@ -103,7 +103,7 @@ evaluation_queues = [
 # Proteogenomics Subchallenge 3 (8720149)
     {
         'id':8720143,
-        'scoring_func':score1,
+        'scoring_func':None,
         'validation_func':validate_func1,
         'column':'proteinID',
         'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'data_test_true.txt')
