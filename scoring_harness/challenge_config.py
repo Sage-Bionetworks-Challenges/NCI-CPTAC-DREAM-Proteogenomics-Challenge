@@ -44,7 +44,7 @@ ADMIN_USER_IDS = [3324230]
 ## every time the script starts and you can link the challenge queues to
 ## the correct scoring/validation functions.  Predictions will be validated and 
 
-def _validate_func_helper(filePath, goldDf, predOrConf, column="proteinID"):
+def _validate_func_helper(filePath, goldDf, predOrConf, column="proteinID", varianceCheck=False):
     fileName = os.path.basename(filePath)
     assert os.path.isfile(filePath), "%s file must be named %s, and your model must generate %s_{1..100}.tsv" % (predOrConf, fileName, predOrConf)
     assert os.stat(filePath).st_size > 0, "%s: Can't be an empty file" % fileName
@@ -57,6 +57,9 @@ def _validate_func_helper(filePath, goldDf, predOrConf, column="proteinID"):
     assert all(goldDf.index.isin(fileDf.index)), "%s: All protein Ids in the goldstandard must also be in your file. You are missing: %s" % (fileName, ",".join(set(goldDf.index[~fileDf.index.isin(goldDf.index)].map(str))))
     assert all(goldDf.columns.isin(fileDf.columns)), "%s: All sample Ids in the goldstandard must also be in your file. You are missing: %s" % (fileName, ",".join(goldDf.columns[~goldDf.columns.isin(fileDf.columns)]))
     assert all(~fileDf.isnull()), "%s: There can't be any null values" % fileName
+    if varianceCheck:
+        assert all([pd.np.var(fileDf[i]) != 0 for i in fileDf]), "%s: No columns can have variance of 0" % fileName
+
 
 def validate_func1(dirName, goldstandard_path, column):
     goldDf = pd.read_csv(goldstandard_path, sep="\t",index_col=0)
@@ -71,7 +74,7 @@ def validate_func2_3(dirName, goldstandard_path, column):
     goldDf = pd.read_csv(goldstandard_path, sep="\t",index_col=0)
     prediction_path = os.path.join(dirName,'predictions.tsv')
     confidence_path = os.path.join(dirName,'confidence.tsv')
-    _validate_func_helper(prediction_path, goldDf, "predictions", column=column)
+    _validate_func_helper(prediction_path, goldDf, "predictions", column=column, varianceCheck=True)
     _validate_func_helper(confidence_path, goldDf, "confidence", column=column)
     return(True,"Passed Validation")
 
@@ -95,6 +98,13 @@ def score2_3(dirName, goldstandard_path):
     corr = corr_by_row(prediction_path, goldstandard_path)[0]
     rmse = nrmse_by_row(prediction_path, goldstandard_path)[0]
     return(corr, rmse)
+
+#3 weeks
+#quota =  
+# {u'firstRoundStart': u'2017-08-01T00:00:00.000Z',
+#   u'numberOfRounds': 1,
+#   u'roundDurationMillis': 1814399000,
+#   u'submissionLimit': 3}
 
 evaluation_queues = [
 
