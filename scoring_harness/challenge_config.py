@@ -8,8 +8,8 @@ robjects.r("source('%s')" % filePath)
 corr_by_row = robjects.r('correlation_by_row')
 nrmse_by_row = robjects.r('NRMSE_by_row')
 
-sc1_nrmsd = robjects.r('score.nrmsd')
-sc1_corr = robjects.r('score.cor')
+get_sc1 = robjects.r('get.score.sc1')
+
 ##-----------------------------------------------------------------------------
 ##
 ## challenge specific code and configuration
@@ -64,6 +64,7 @@ def _validate_func_helper(filePath, goldDf, predOrConf, column="proteinID", vari
 def validate_func1(dirName, goldstandard_path, column):
     goldDf = pd.read_csv(goldstandard_path, sep="\t",index_col=0)
     for num in range(1,101):
+        get_sc1(pred)
         prediction_path = os.path.join(dirName,'predictions_%d.tsv' % num)
         confidence_path = os.path.join(dirName,'confidence_%d.tsv' % num)
         _validate_func_helper(prediction_path, goldDf, "predictions")
@@ -101,11 +102,11 @@ def score2_3(dirName, goldstandard_path):
 
 #3 weeks
 #quota =  
-# {u'firstRoundStart': u'2017-08-01T00:00:00.000Z',
+# {u'firstRoundStart': u'2017-07-14T00:00:00.000Z',
 #   u'numberOfRounds': 1,
-#   u'roundDurationMillis': 1814399000,
+#   u'roundDurationMillis': 3369599000,
 #   u'submissionLimit': 3}
-
+#1503385199000 - 1500015600000
 evaluation_queues = [
 
 # Proteogenomics Subchallenge 1 (8720143)

@@ -42,8 +42,6 @@ get.score.sc1 = function(path='/',observed_path,truth_path)
 }
 
 
-
-
 ###SC2 and SC3
 
 ################################## load pearson correlation function ##################################
