@@ -8,7 +8,8 @@ robjects.r("source('%s')" % filePath)
 corr_by_row = robjects.r('correlation_by_row')
 nrmse_by_row = robjects.r('NRMSE_by_row')
 
-get_sc1 = robjects.r('get.score.sc1')
+score_cor = robjects.r('score.cor')
+score_nrmse = robjects.r('score.nrmsd')
 
 ##-----------------------------------------------------------------------------
 ##
@@ -64,7 +65,6 @@ def _validate_func_helper(filePath, goldDf, predOrConf, column="proteinID", vari
 def validate_func1(dirName, goldstandard_path, column):
     goldDf = pd.read_csv(goldstandard_path, sep="\t",index_col=0)
     for num in range(1,101):
-        get_sc1(pred)
         prediction_path = os.path.join(dirName,'predictions_%d.tsv' % num)
         confidence_path = os.path.join(dirName,'confidence_%d.tsv' % num)
         _validate_func_helper(prediction_path, goldDf, "predictions")
@@ -79,18 +79,18 @@ def validate_func2_3(dirName, goldstandard_path, column):
     _validate_func_helper(confidence_path, goldDf, "confidence", column=column)
     return(True,"Passed Validation")
 
-def score1(dirName, goldstandard_path):
+def score1(dirName, goldstandardDir):
     ##Read in submission (submission.filePath)
     ##Score against goldstandard
+    goldstandard_path = os.path.join(goldstandardDir, "data_test_true.txt")
     sc1_nrmsd_scores = []
     sc1_corr_scores = []
     for num in range(1,101):
         prediction_path = os.path.join(dirName,'predictions_%d.tsv' % num)
-        nrmse = sc1_nrmsd(prediction_path, obs_path, goldstandard_path)[0]
-        corr = sc1_corr(prediction_path, obs_path, goldstandard_path)[0]
-        sc1_nrmsd_scores.append(nrmse)
-        sc1_corr_scores.append(corr)
-    return(sc1_nrmsd_scores[0], sc1_corr_scores[0])
+        observed_path = os.path.join(goldstandardDir, "data_test_obs_%d.txt" % num)
+        sc1_corr_scores.append(score_cor(prediction_path, observed_path, goldstandard_path)[0])
+        sc1_nrmsd_scores.append(score_nrmse(prediction_path, observed_path, goldstandard_path)[0])
+    return(pd.np.mean(sc1_corr_scores), pd.np.mean(sc1_nrmsd_scores))
 
 def score2_3(dirName, goldstandard_path):
     ##Read in submission (submission.filePath)
@@ -117,14 +117,14 @@ evaluation_queues = [
         'scoring_func':None,
         'validation_func':validate_func1,
         'column':'proteinID',
-        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'data_test_true.txt')
+        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard')
     },
     {
         'id':8720145,
         'scoring_func':score2_3,
         'validation_func':validate_func2_3,
         'column':'proteinID',
-        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'rescaled_prospective_ova_proteome_filtered_5820.txt')
+        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/rescaled_prospective_ova_proteome_filtered_5820.txt')
     },
     {
         'id':8720149,
@@ -141,7 +141,7 @@ evaluation_queues = [
         'scoring_func':None,
         'validation_func':validate_func1,
         'column':'proteinID',
-        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'data_test_true.txt')
+        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard')
 
     },
     {
@@ -236,9 +236,9 @@ def score_submission(syn, evaluation, submission):
 
 
     if scoring_func is not None:
-        corr, rmse = scoring_func(dirname,config['goldstandard_path'])
+        corr, nrmse = scoring_func(dirname,config['goldstandard_path'])
     #Make sure to round results to 3 or 4 digits
-        return(dict(corr=round(corr,4), rmse=round(rmse,4)), "You submission was scored.\ncorr: %s\nrmse: %s" %(round(corr,4),round(rmse,4)))
+        return(dict(corr=round(corr,4), rmse=round(nrmse,4)), "You submission was scored.\ncorr: %s\nnrmse: %s" %(round(corr,4),round(nrmse,4)))
     else:
         return(dict(), "Your prediction file is in the correct format and can be scored.  Please feel free to submit to the real challenge queues.")
 

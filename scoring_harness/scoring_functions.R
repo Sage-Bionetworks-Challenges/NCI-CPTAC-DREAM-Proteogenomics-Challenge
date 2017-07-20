@@ -1,46 +1,24 @@
 ##SC1
 
-score.nrmsd = function(pred_path, observed_path, truth_path)  
-{
-  d.predict = as.matrix(read.table( pred_path, sep="\t"));
-  d.true = as.matrix(read.table( truth_path, sep="\t"));
-  missing.ind = is.na(as.matrix(read.table( observed_path, sep="\t")));
-  
-  diff.true = apply(d.true, 1, function(x){diff(range(x[x>0]))});
-  d.predict[!missing.ind]= NA;
-  nrmsd = sqrt(apply((d.predict-d.true)^2,1,mean,na.rm=T))/diff.true;
-  return(mean(nrmsd));
+score.nrmsd = function(pred_path, observed_path, truth_path) {
+  d.predict = as.matrix(read.csv( pred_path, sep="\t", check.names=F, row.names=1))
+  d.true = as.matrix(read.csv( truth_path, sep="\t", check.names=F, row.names=1))
+  missing.ind = is.na(as.matrix(read.csv( observed_path, sep="\t", check.names=F, row.names=1)))
+  diff.true = apply(d.true, 1, function(x){diff(range(x[x>0]))})
+  d.predict[!missing.ind]= NA
+  nrmsd = sqrt(apply((d.predict-d.true)^2,1,mean,na.rm=T))/diff.true
+  return(mean(nrmsd))
 }
 
-
-score.cor = function(pred_path, observed_path, truth_path)  
-{
-  d.predict = as.matrix(read.table( pred_path, sep="\t"));
-  d.true = as.matrix(read.table( truth_path, sep="\t"));
-  missing.ind = is.na(as.matrix(read.table( observed_path, sep="\t")));
-  
+score.cor = function(pred_path, observed_path, truth_path) {
+  d.predict = as.matrix(read.csv( pred_path, sep="\t", check.names=F, row.names=1))
+  d.true = as.matrix(read.csv( truth_path, sep="\t", check.names=F, row.names=1))
+  missing.ind = is.na(as.matrix(read.csv( observed_path, sep="\t", check.names=F, row.names=1)))
   L = dim(d.true)[1]
-  d.predict[!missing.ind]= NA;
-  cor.p = sapply(1:L,function(l){cor(d.predict[l,],d.true[l,],use = 'pairwise.complete.obs')});
-  return(mean(cor.p));
+  d.predict[!missing.ind]= NA
+  cor.p = sapply(1:L,function(l){cor(d.predict[l,],d.true[l,],use = 'pairwise.complete.obs')})
+  return(mean(cor.p))
 }
-
-#######################################################################
-
-get.score.sc1 = function(path='/',observed_path,truth_path)
-{
-  pred_path_all = paste(path,'imputated_data/',dir(paste(path,'imputated_data/',sep='')),sep='');
-  nrmsd_all=NULL;
-  cor_all=NULL;
-  for(i in 1:length(pred_path_all))
-  {
-    pred_path=pred_path_all[i];
-    nrmsd.all = c(nrmsd.all,score.nrmsd(pred_path, observed_path, truth_path));  
-    cor.all = c(cor.all,score.cor(pred_path, observed_path, truth_path));  
-  }    
-  return(list(nrmsd = mean(nrmsd.all),  cor = mean(cor.all) )); 
-}
-
 
 ###SC2 and SC3
 
@@ -48,9 +26,9 @@ get.score.sc1 = function(path='/',observed_path,truth_path)
 correlation_by_row <- function(pred_path, truth_path) {
   prediction <- read.csv( pred_path, row.names = 1 , check.names = F, sep="\t") 
   test_prot  <- read.csv( truth_path, row.names = 1 , check.names = F, sep="\t")
-  common_protein <- intersect(rownames(prediction), rownames(test_prot))
-  prediction <- prediction[common_protein, colnames(test_prot)]
-  test_prot <- test_prot[common_protein, colnames(test_prot)]
+  #common_protein <- intersect(rownames(prediction), rownames(test_prot))
+  prediction <- prediction[rownames(test_prot), colnames(test_prot)]
+  test_prot <- test_prot[rownames(test_prot), colnames(test_prot)]
 
   mat1 <- as.matrix(prediction)
   mat2 <- as.matrix(test_prot) 
@@ -63,7 +41,6 @@ correlation_by_row <- function(pred_path, truth_path) {
   names(corr_vec) <- rownames(mat1)
   return(mean(corr_vec))
 }
-
 #result_corr <- correlation_by_row("predictions.tsv", "pros_ova_proteome_sort_common_gene_6577.txt")
 
 ########################################## load NRMSE function #########################################
@@ -84,6 +61,5 @@ NRMSE_by_row <- function(pred_path, truth_path)  {
   names(nrmse_vec) <- rownames(mat1)
   return(mean(nrmse_vec))
 }
-
 #result_nrmse <- NRMSE_by_row("predictions.tsv", "pros_ova_proteome_sort_common_gene_6577.txt")
 

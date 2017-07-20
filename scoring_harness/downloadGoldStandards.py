@@ -14,11 +14,14 @@ def main():
 	parser.add_argument("--express", help="Express lane", action="store_true", default=False)
 	args = parser.parse_args()
 	syn = synapseclient.login()
-	downloadDir = os.path.dirname(os.path.abspath(__file__))
+	downloadDir = os.path.join(os.path.dirname(os.path.abspath(__file__)),"goldstandard")
+	if not os.path.exists(downloadDir):
+		os.mkdir(downloadDir)
 	
 	downloadData(syn, "syn10165897",downloadDir)
 	downloadData(syn, "syn10165898",downloadDir)
 	downloadData(syn, "syn10165900",downloadDir)
+	downloadData(syn, "syn10164401",downloadDir)
 
 	# if args.express:
 	# 	shutil.copy(cna.path, testDataDir)
