@@ -62,7 +62,8 @@ def _validate_func_helper(filePath, goldDf, predOrConf, column="proteinID", vari
         assert all([pd.np.var(fileDf[i]) != 0 for i in fileDf]), "%s: No columns can have variance of 0" % fileName
 
 
-def validate_func1(dirName, goldstandard_path, column):
+def validate_func1(dirName, goldstandardDir, column):
+    goldstandard_path = os.path.join(goldstandardDir, "data_test_true.txt")
     goldDf = pd.read_csv(goldstandard_path, sep="\t",index_col=0)
     for num in range(1,101):
         prediction_path = os.path.join(dirName,'predictions_%d.tsv' % num)
