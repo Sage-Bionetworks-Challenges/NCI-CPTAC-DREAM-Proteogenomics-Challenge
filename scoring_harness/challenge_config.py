@@ -59,7 +59,7 @@ def _validate_func_helper(filePath, goldDf, predOrConf, column="proteinID", vari
     assert all(goldDf.columns.isin(fileDf.columns)), "%s: All sample Ids in the goldstandard must also be in your file. You are missing: %s" % (fileName, ",".join(goldDf.columns[~goldDf.columns.isin(fileDf.columns)]))
     assert all(~fileDf.isnull()), "%s: There can't be any null values" % fileName
     if varianceCheck:
-        assert all([pd.np.var(fileDf[i]) != 0 for i in fileDf]), "%s: No columns can have variance of 0" % fileName
+        assert all(fileDf.apply(pd.np.var,axis=0) != 0), "%s: No columns can have variance of 0" % fileName
 
 
 def validate_func1(dirName, goldstandard_path, column):
