@@ -62,7 +62,8 @@ def _validate_func_helper(filePath, goldDf, predOrConf, column="proteinID", vari
         assert all(fileDf.apply(pd.np.var,axis=0) != 0), "%s: No columns can have variance of 0" % fileName
 
 
-def validate_func1(dirName, goldstandard_path, column):
+def validate_func1(dirName, goldstandardDir, column):
+    goldstandard_path = os.path.join(goldstandardDir, "data_test_true.txt")
     goldDf = pd.read_csv(goldstandard_path, sep="\t",index_col=0)
     for num in range(1,101):
         prediction_path = os.path.join(dirName,'predictions_%d.tsv' % num)
@@ -114,7 +115,7 @@ evaluation_queues = [
 # Proteogenomics Subchallenge 3 (8720149)
     {
         'id':8720143,
-        'scoring_func':None,
+        'scoring_func':score1,
         'validation_func':validate_func1,
         'column':'proteinID',
         'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard')
