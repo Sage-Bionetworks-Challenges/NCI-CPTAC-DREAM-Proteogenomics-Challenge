@@ -55,7 +55,7 @@ def _validate_func_helper(filePath, goldDf, predOrConf, column="proteinID", vari
     del fileDf[column]
     assert all(~fileDf.index.duplicated()), "%s: There cannot be any duplicated protein ids" % fileName
     assert all(~fileDf.columns.duplicated()), "%s: There cannot be any duplicated sample ids" % fileName
-    assert all(goldDf.index.isin(fileDf.index)), "%s: All protein Ids in the goldstandard must also be in your file. You are missing: %s" % (fileName, ",".join(set(goldDf.index[~fileDf.index.isin(goldDf.index)].map(str))))
+    assert all(goldDf.index.isin(fileDf.index)), "%s: All protein Ids in the goldstandard must also be in your file. You are missing: %s" % (fileName, ",".join(set(goldDf.index[~goldDf.index.isin(fileDf.index)].map(str))))
     assert all(goldDf.columns.isin(fileDf.columns)), "%s: All sample Ids in the goldstandard must also be in your file. You are missing: %s" % (fileName, ",".join(goldDf.columns[~goldDf.columns.isin(fileDf.columns)]))
     assert all(~fileDf.isnull()), "%s: There can't be any null values" % fileName
     if varianceCheck:
