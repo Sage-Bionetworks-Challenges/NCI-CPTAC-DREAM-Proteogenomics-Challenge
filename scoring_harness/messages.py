@@ -16,9 +16,9 @@ dry_run = False
 
 ## Edit these URLs to point to your challenge and its support forum
 defaults = dict(
-    challenge_instructions_url = "https://www.synapse.org/",
-    support_forum_url = "https://www.synapse.org/#!Synapse:{synIdhere}/discussion/default",
-    scoring_script = "the scoring script")
+    challenge_instructions_url = "https://www.synapse.org/#!Synapse:syn8228304/wiki/448381",
+    support_forum_url = "https://www.synapse.org/#!Synapse:syn8228304/discussion/default",
+    scoring_script = "NCI-CPTAC Scoring Script")
 
 ##---------------------------------------------------------
 ## Message templates:
