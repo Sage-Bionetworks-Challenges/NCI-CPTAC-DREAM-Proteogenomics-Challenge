@@ -20,7 +20,7 @@ def main():
 	
 	if not os.path.exists(testDataDir):
 		os.mkdir(testDataDir)
-
+	os.system("rm -f %s/*" % testDataDir)
 	if args.sc == 'sc1':
 		downloadData(syn, "syn10164401",testDataDir)
 	elif args.sc == 'sc2':
