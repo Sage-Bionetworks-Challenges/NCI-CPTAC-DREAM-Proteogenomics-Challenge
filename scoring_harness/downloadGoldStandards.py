@@ -21,7 +21,6 @@ def main():
 	downloadData(syn, "syn10165897",downloadDir)
 	downloadData(syn, "syn10165898",downloadDir)
 	downloadData(syn, "syn10165900",downloadDir)
-	downloadData(syn, "syn10164401",downloadDir)
 
 	# if args.express:
 	# 	shutil.copy(cna.path, testDataDir)
