@@ -25,10 +25,10 @@ def main():
 		downloadData(syn, "syn10164401",testDataDir)
 	elif args.sc == 'sc2':
 		downloadData(syn, "syn10139559",testDataDir)
-		downloadData(syn, "syn10139560",testDataDir)
+		#downloadData(syn, "syn10139560",testDataDir)
 	else:
 		downloadData(syn, "syn10139567",testDataDir)
-		downloadData(syn, "syn10139568",testDataDir)
+		#downloadData(syn, "syn10139568",testDataDir)
 
 	# if args.express:
 	# 	shutil.copy(cna.path, testDataDir)
