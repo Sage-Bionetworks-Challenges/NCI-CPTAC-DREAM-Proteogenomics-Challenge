@@ -118,6 +118,7 @@ evaluation_queues = [
         'scoring_func':score1,
         'validation_func':validate_func1,
         'column':'proteinID',
+        #THIS IS AN EXCEPTION.  NEEDS TO PROVIDE GOLDSTANDARD DIRECTORY
         'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard')
     },
     {
@@ -125,41 +126,41 @@ evaluation_queues = [
         'scoring_func':score2_3,
         'validation_func':validate_func2_3,
         'column':'proteinID',
-        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/rescaled_prospective_ova_proteome_filtered_5820.txt')
+        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/prospective_ova_proteome_PNNL_filtered.txt')
     },
     {
         'id':8720149,
         'scoring_func':score2_3,
         'validation_func':validate_func2_3,
         'column':'phosphoID',
-        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'Noneyet')
-    },
+        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/prospective_ova_phospho_PNNL_filtered.txt')
+    }#,
 # Proteogenomics Subchallenge 1 Express Lane (9604716)
 # Proteogenomics Subchallenge 2 Express Lane (9604717)
 # Proteogenomics Subchallenge 3 Express Lane (9604718)
-    {
-        'id':9604716,
-        'scoring_func':None,
-        'validation_func':validate_func1,
-        'column':'proteinID',
-        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard')
+    # {
+    #     'id':9604716,
+    #     'scoring_func':None,
+    #     'validation_func':validate_func1,
+    #     'column':'proteinID',
+    #     'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard')
 
-    },
-    {
-        'id':9604717,
-        'scoring_func':None,
-        'validation_func':validate_func2_3,
-        'column':'proteinID',
-        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'rescaled_prospective_ova_proteome_filtered_5820.txt')
-    },
-    {
-        'id':9604718,
-        'scoring_func':None,
-        'validation_func':validate_func2_3,
-        'column':'phosphoID',
-        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'Noneyet')
+    # },
+    # {
+    #     'id':9604717,
+    #     'scoring_func':None,
+    #     'validation_func':validate_func2_3,
+    #     'column':'proteinID',
+    #     'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'rescaled_prospective_ova_proteome_filtered_5820.txt')
+    # },
+    # {
+    #     'id':9604718,
+    #     'scoring_func':None,
+    #     'validation_func':validate_func2_3,
+    #     'column':'phosphoID',
+    #     'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'Noneyet')
 
-    }
+    # }
 ]
 evaluation_queue_by_id = {q['id']:q for q in evaluation_queues}
 
