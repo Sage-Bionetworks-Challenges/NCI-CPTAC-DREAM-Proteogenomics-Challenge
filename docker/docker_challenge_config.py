@@ -195,7 +195,10 @@ def dockerRun(submission, scoring_sh, syn, client):
                         logs = syn.store(ent)
             #Remove container and image after being done
             container.remove()
-            client.images.remove(dockerImage)
+            try:
+                client.images.remove(dockerImage)
+            except:
+                print("Unable to remove image")
         statinfo = os.stat(logFileName)
         if statinfo.st_size == 0:
             if errors is not None:
