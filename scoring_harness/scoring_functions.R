@@ -46,7 +46,7 @@ correlation_by_row <- function(pred_path, truth_path) {
   names(corr_vec) <- rownames(mat1)
   return(mean(corr_vec))
 }
-#result_corr <- correlation_by_row("predictions.tsv", "pros_ova_proteome_sort_common_gene_6577.txt")
+#result_corr <- correlation_by_row("predictions.tsv", "prospective_ova_proteome_sort_common_gene_7061.txt")
 
 ########################################## load NRMSE function #########################################
 NRMSE_by_row <- function(pred_path, truth_path)  {
@@ -66,5 +66,5 @@ NRMSE_by_row <- function(pred_path, truth_path)  {
   names(nrmse_vec) <- rownames(mat1)
   return(mean(nrmse_vec))
 }
-#result_nrmse <- NRMSE_by_row("predictions.tsv", "pros_ova_proteome_sort_common_gene_6577.txt")
+#result_nrmse <- NRMSE_by_row("predictions.tsv", "prospective_ova_proteome_sort_common_gene_7061.txt")
 
