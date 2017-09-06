@@ -3,15 +3,20 @@ import argparse
 import os
 import shutil
 
-def downloadData(syn, parentId, testDataDir):
+def downloadData(syn, parentId, testDataDir, replaceName=None):
 	download = syn.getChildren(parentId)
 	for i in download:
 		temp = syn.get(i['id'])
-		shutil.copy(temp.path, "%s/%s" % (testDataDir, os.path.basename(temp.path)))
+		if replaceName is not None:
+			newName = os.path.basename(temp.path).replace(replaceName,'')
+		else:
+			newName = os.path.basename(temp.path)
+		shutil.copy(temp.path, "%s/%s" % (testDataDir, newName))
 
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('sc',help="subchallenge",choices=['sc1','sc2','sc3'])
+	parser.add_argument('round',help="round",choices=['1','2','final'])
 	parser.add_argument("--express", help="Express lane", action="store_true", default=False)
 	args = parser.parse_args()
 	syn = synapseclient.login()
@@ -21,14 +26,38 @@ def main():
 	if not os.path.exists(testDataDir):
 		os.mkdir(testDataDir)
 	os.system("rm -f %s/*" % testDataDir)
+
+	#Complete data
+	# if args.sc == 'sc1':
+	# 	downloadData(syn, "syn10164401",testDataDir)
+	# elif args.sc == 'sc2':
+	# 	downloadData(syn, "syn10139559",testDataDir)
+	# 	#downloadData(syn, "syn10139560",testDataDir)
+	# else:
+	# 	downloadData(syn, "syn10139567",testDataDir)
+	# 	#downloadData(syn, "syn10139568",testDataDir)
+
+
+	if args.round == '1':
+		sc2 = "syn10617839"
+		sc3 = 'syn10617842'
+		replace = "_round_1"
+	elif args.round == '2':
+		sc2 = 'syn10617840'
+		sc3 = 'syn10617843'
+		replace = "_round_2"
+	else:
+		sc2 = 'syn10617841'
+		sc3 = 'syn10617844'
+		replace = "_final_round"
+
 	if args.sc == 'sc1':
 		downloadData(syn, "syn10164401",testDataDir)
 	elif args.sc == 'sc2':
-		downloadData(syn, "syn10139559",testDataDir)
-		#downloadData(syn, "syn10139560",testDataDir)
+		downloadData(syn, sc2, testDataDir,replace)
 	else:
-		downloadData(syn, "syn10139567",testDataDir)
-		#downloadData(syn, "syn10139568",testDataDir)
+		downloadData(syn, sc3, testDataDir,replace)
+
 
 	# if args.express:
 	# 	shutil.copy(cna.path, testDataDir)
