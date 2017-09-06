@@ -126,14 +126,14 @@ evaluation_queues = [
         'scoring_func':score2_3,
         'validation_func':validate_func2_3,
         'column':'proteinID',
-        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/prospective_ova_proteome_PNNL_filtered.txt')
+        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/pros_ova_proteome_sort_common_gene_7061.txt')
     },
     {
         'id':8720149,
         'scoring_func':score2_3,
         'validation_func':validate_func2_3,
         'column':'phosphoID',
-        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/prospective_ova_phospho_PNNL_filtered.txt')
+        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/pros_ova_phospho_sort_common_gene_12237.txt')
     }#,
 # Proteogenomics Subchallenge 1 Express Lane (9604716)
 # Proteogenomics Subchallenge 2 Express Lane (9604717)

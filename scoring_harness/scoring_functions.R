@@ -32,6 +32,11 @@ correlation_by_row <- function(pred_path, truth_path) {
 
   mat1 <- as.matrix(prediction)
   mat2 <- as.matrix(test_prot) 
+  
+  # consider only proteins with less than 30% missing values
+  # mat2 <- mat2 [ which(rowMeans(is.na(mat2)) < 0.3) , ]
+  # mat1 <- mat1 [rownames(mat2), ]
+  
   corr_vec <- c()
   for(i in 1:length(mat1[ ,1]) ) {
     temp <- cor.test(mat1[ i, ], mat2[ i , ])
@@ -41,7 +46,7 @@ correlation_by_row <- function(pred_path, truth_path) {
   names(corr_vec) <- rownames(mat1)
   return(mean(corr_vec))
 }
-#result_corr <- correlation_by_row("predictions.tsv", "pros_ova_proteome_sort_common_gene_6577.txt")
+#result_corr <- correlation_by_row("predictions.tsv", "prospective_ova_proteome_sort_common_gene_7061.txt")
 
 ########################################## load NRMSE function #########################################
 NRMSE_by_row <- function(pred_path, truth_path)  {
@@ -61,5 +66,5 @@ NRMSE_by_row <- function(pred_path, truth_path)  {
   names(nrmse_vec) <- rownames(mat1)
   return(mean(nrmse_vec))
 }
-#result_nrmse <- NRMSE_by_row("predictions.tsv", "pros_ova_proteome_sort_common_gene_6577.txt")
+#result_nrmse <- NRMSE_by_row("predictions.tsv", "prospective_ova_proteome_sort_common_gene_7061.txt")
 
