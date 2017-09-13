@@ -726,7 +726,7 @@ def main():
 
     ## Acquire lock, don't run two scoring scripts at once
     try:
-        update_lock = lock.acquire_lock_or_fail('challenge', max_age=timedelta(hours=4))
+        update_lock = lock.acquire_lock_or_fail('challenge', max_age=timedelta(hours=24))
     except lock.LockedException:
         print u"Is the scoring script already running? Can't acquire lock."
         # can't acquire lock, so return error code 75 which is a
