@@ -33,12 +33,6 @@ correlation_by_row <- function(pred_path, truth_path) {
   mat1 <- as.matrix(prediction)
   mat2 <- as.matrix(test_prot) 
   
-  # remove ID column and turn into numeric
-  mat1<-mat1[ ,-1]
-  mat2<-mat2[ ,-1]
-  class(mat1) <- "numeric"
-  class(mat2) <- "numeric"
-  
   corr_vec <- c()
   for(i in 1:length(mat1[ ,1]) ) {
     temp <- cor.test(mat1[ i, ], mat2[ i , ])
@@ -60,13 +54,7 @@ NRMSE_by_row <- function(pred_path, truth_path)  {
   test_prot <- test_prot[common_protein , colnames(test_prot)]
   mat1 <- as.matrix(prediction)
   mat2 <- as.matrix(test_prot) 
-  
-  # remove ID column and turn into numeric
-  mat1<-mat1[ ,-1]
-  mat2<-mat2[ ,-1]
-  class(mat1) <- "numeric"
-  class(mat2) <- "numeric"
- 
+
   nrmse_vec <- c()
   for(i in 1:length(mat1[ ,1]) ) {
     temp <- hydroGOF::rmse(mat1[i,], mat2[i,],na.rm=T)
