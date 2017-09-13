@@ -25,14 +25,14 @@ def main():
 	downloadData(syn, "syn10164401",downloadDir)
 	sc1 = syn.get("syn10164502")
 	if args.round == '1':
-		sc2 = syn.get("syn10617817")
-		sc3 = syn.get("syn10617831")
+		sc2 = syn.get("syn10763208")
+		sc3 = syn.get("syn10763237")
 	elif args.round == '2':
-		sc2 = syn.get("syn10617818")
-		sc3 = syn.get("syn10617838")
+		sc2 = syn.get("syn10763217")
+		sc3 = syn.get("syn10763243")
 	else:
-		sc2 = syn.get("syn10617819")
-		sc3 = syn.get("syn10617830")
+		sc2 = syn.get("syn10763225")
+		sc3 = syn.get("syn10763252")
 	shutil.copy(sc1.path, downloadDir)
 	shutil.copy(sc2.path, os.path.join(downloadDir, "prospective_ova_pro_gold.txt"))
 	shutil.copy(sc3.path, os.path.join(downloadDir, "prospective_ova_phospho_gold.txt"))

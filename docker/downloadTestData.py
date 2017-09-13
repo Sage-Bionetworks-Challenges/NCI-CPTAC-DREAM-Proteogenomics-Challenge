@@ -54,9 +54,12 @@ def main():
 	if args.sc == 'sc1':
 		downloadData(syn, "syn10164401",testDataDir)
 	elif args.sc == 'sc2':
-		downloadData(syn, sc2, testDataDir,replace)
+		#downloadData(syn, sc2, testDataDir,replace)
+		downloadData(syn, sc2, testDataDir)
 	else:
-		downloadData(syn, sc3, testDataDir,replace)
+		#downloadData(syn, sc3, testDataDir,replace)
+		downloadData(syn, sc2, testDataDir)
+
 
 
 	# if args.express:
