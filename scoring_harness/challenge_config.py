@@ -49,7 +49,13 @@ def _validate_func_helper(filePath, goldDf, predOrConf, column="proteinID", vari
     fileName = os.path.basename(filePath)
     assert os.path.isfile(filePath), "%s file must be named %s, and your model must generate %s_{1..100}.tsv" % (predOrConf, fileName, predOrConf)
     assert os.stat(filePath).st_size > 0, "%s: Can't be an empty file" % fileName
+    try :
+        fileDf = pd.read_csv(filePath, sep="\t",header=None)
+    except pd.errors.ParserError as e:
+        raise AssertionError("Please do not write out the row names in your prediction file.")
+
     fileDf = pd.read_csv(filePath, sep="\t")
+
     assert fileDf.get(column) is not None, "%s: Must contain proteinID column" % fileName
     fileDf.index = fileDf[column]
     del fileDf[column]
