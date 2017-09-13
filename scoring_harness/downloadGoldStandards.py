@@ -11,7 +11,7 @@ def downloadData(syn, parentId, testDataDir):
 
 def main():
 	parser = argparse.ArgumentParser()
-	parser.add_argument("round", help="Round", choices=['1','2',"final"])
+	parser.add_argument("round", help="Round", choices=['1','2',"final",'test'])
 	parser.add_argument("--express", help="Express lane", action="store_true", default=False)
 	args = parser.parse_args()
 	syn = synapseclient.login()
@@ -30,6 +30,9 @@ def main():
 	elif args.round == '2':
 		sc2 = syn.get("syn10763217")
 		sc3 = syn.get("syn10763243")
+	elif args.round == 'test':
+		sc2 = syn.get("syn10514976")
+		sc3 = syn.get("syn10666694")
 	else:
 		sc2 = syn.get("syn10763225")
 		sc3 = syn.get("syn10763252")

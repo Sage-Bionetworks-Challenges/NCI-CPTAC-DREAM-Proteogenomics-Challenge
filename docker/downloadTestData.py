@@ -16,7 +16,7 @@ def downloadData(syn, parentId, testDataDir, replaceName=None):
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('sc',help="subchallenge",choices=['sc1','sc2','sc3'])
-	parser.add_argument('round',help="round",choices=['1','2','final'])
+	parser.add_argument('round',help="round",choices=['1','2','final','test'])
 	parser.add_argument("--express", help="Express lane", action="store_true", default=False)
 	args = parser.parse_args()
 	syn = synapseclient.login()
@@ -27,17 +27,6 @@ def main():
 		os.mkdir(testDataDir)
 	os.system("rm -f %s/*" % testDataDir)
 
-	#Complete data
-	# if args.sc == 'sc1':
-	# 	downloadData(syn, "syn10164401",testDataDir)
-	# elif args.sc == 'sc2':
-	# 	downloadData(syn, "syn10139559",testDataDir)
-	# 	#downloadData(syn, "syn10139560",testDataDir)
-	# else:
-	# 	downloadData(syn, "syn10139567",testDataDir)
-	# 	#downloadData(syn, "syn10139568",testDataDir)
-
-
 	if args.round == '1':
 		sc2 = "syn10617839"
 		sc3 = 'syn10617842'
@@ -46,6 +35,9 @@ def main():
 		sc2 = 'syn10617840'
 		sc3 = 'syn10617843'
 		replace = "_round_2"
+	elif args.round == 'test':
+		sc2 = 'syn10139559'
+		sc3 = 'syn10139567'
 	else:
 		sc2 = 'syn10617841'
 		sc3 = 'syn10617844'
