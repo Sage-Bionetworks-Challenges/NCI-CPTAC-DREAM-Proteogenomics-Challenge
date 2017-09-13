@@ -33,9 +33,11 @@ correlation_by_row <- function(pred_path, truth_path) {
   mat1 <- as.matrix(prediction)
   mat2 <- as.matrix(test_prot) 
   
-  # consider only proteins with less than 30% missing values
-  # mat2 <- mat2 [ which(rowMeans(is.na(mat2)) < 0.3) , ]
-  # mat1 <- mat1 [rownames(mat2), ]
+  # remove ID column and turn into numeric
+  mat1<-mat1[ ,-1]
+  mat2<-mat2[ ,-1]
+  class(mat1) <- "numeric"
+  class(mat2) <- "numeric"
   
   corr_vec <- c()
   for(i in 1:length(mat1[ ,1]) ) {
