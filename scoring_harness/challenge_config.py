@@ -56,12 +56,12 @@ def _validate_func_helper(filePath, goldDf, predOrConf, column="proteinID", vari
 
     fileDf = pd.read_csv(filePath, sep="\t")
 
-    assert fileDf.get(column) is not None, "%s: Must contain proteinID column" % fileName
+    assert fileDf.get(column) is not None, "%s: Must contain %s column" % (fileName,column)
     fileDf.index = fileDf[column]
     del fileDf[column]
-    assert all(~fileDf.index.duplicated()), "%s: There cannot be any duplicated protein ids" % fileName
+    assert all(~fileDf.index.duplicated()), "%s: There cannot be any duplicated %s" % (fileName,column)
     assert all(~fileDf.columns.duplicated()), "%s: There cannot be any duplicated sample ids" % fileName
-    assert all(goldDf.index.isin(fileDf.index)), "%s: All protein Ids in the goldstandard must also be in your file. You are missing: %s" % (fileName, ",".join(set(goldDf.index[~goldDf.index.isin(fileDf.index)].map(str))))
+    assert all(goldDf.index.isin(fileDf.index)), "%s: All %s in the goldstandard must also be in your file. You are missing: %s" % (fileName, column, ",".join(set(goldDf.index[~goldDf.index.isin(fileDf.index)].map(str))))
     assert all(goldDf.columns.isin(fileDf.columns)), "%s: All sample Ids in the goldstandard must also be in your file. You are missing: %s" % (fileName, ",".join(goldDf.columns[~goldDf.columns.isin(fileDf.columns)]))
     assert all(~fileDf.isnull()), "%s: There can't be any null values" % fileName
     if varianceCheck:
@@ -140,7 +140,7 @@ evaluation_queues = [
         'validation_func':validate_func2_3,
         'column':'phosphoID',
         'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/prospective_ova_phospho_gold.txt')
-    }#,
+    },
 # Proteogenomics Subchallenge 1 Express Lane (9604716)
 # Proteogenomics Subchallenge 2 Express Lane (9604717)
 # Proteogenomics Subchallenge 3 Express Lane (9604718)
@@ -157,16 +157,41 @@ evaluation_queues = [
     #     'scoring_func':None,
     #     'validation_func':validate_func2_3,
     #     'column':'proteinID',
-    #     'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'rescaled_prospective_ova_proteome_filtered_5820.txt')
+    #     'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/prospective_ova_pro_gold_express.txt')
     # },
     # {
     #     'id':9604718,
     #     'scoring_func':None,
     #     'validation_func':validate_func2_3,
     #     'column':'phosphoID',
-    #     'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'Noneyet')
+    #     'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/prospective_ova_phospho_gold_express.txt')
 
-    # }
+    # },
+# Proteogenomics Subchallenge 1 Internal (9606530)
+# Proteogenomics Subchallenge 2 Internal (9606531)
+# Proteogenomics Subchallenge 3 Internal (9606532)
+    {
+        'id':9606530,
+        'scoring_func':score1,
+        'validation_func':validate_func1,
+        'column':'proteinID',
+        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard')
+
+    },
+    {
+        'id':9606531,
+        'scoring_func':score2_3,
+        'validation_func':validate_func2_3,
+        'column':'proteinID',
+        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/prospective_ova_pro_gold_complete.txt')
+    },
+    {
+        'id':9606532,
+        'scoring_func':score2_3,
+        'validation_func':validate_func2_3,
+        'column':'phosphoID',
+        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/prospective_ova_phospho_gold_complete.txt')
+    }
 ]
 evaluation_queue_by_id = {q['id']:q for q in evaluation_queues}
 
