@@ -50,7 +50,7 @@ def main():
 		downloadData(syn, sc2, testDataDir)
 	else:
 		#downloadData(syn, sc3, testDataDir,replace)
-		downloadData(syn, sc2, testDataDir)
+		downloadData(syn, sc3, testDataDir)
 
 
 
