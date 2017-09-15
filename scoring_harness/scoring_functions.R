@@ -2,15 +2,9 @@
 
 score.nrmsd = function(pred_path, observed_path, truth_path)  
 {
-  d.predict = as.matrix(read.table( pred_path, sep="\t"));
-  d.true = as.matrix(read.table( truth_path, sep="\t"));
-  missing.ind = is.na(as.matrix(read.table( observed_path, sep="\t")));
-  
-  if(any(dim(d.true)!=dim(d.true))||any(dim(d.true)!=dim(missing.ind)))
-    stop("Please provide three matrices of equal size.");
-  
-  if(sum(is.na(d.predict))>0)
-    stop("Please provide a complete prediction.");
+  d.predict = as.matrix(read.csv( pred_path, sep="\t", row.names=1));
+  d.true = as.matrix(read.csv( truth_path, sep="\t", row.names=1));
+  missing.ind = is.na(as.matrix(read.csv( observed_path, sep="\t", row.names=1)));
   
   diff.true = apply(d.true, 1, function(x){diff(range(x[x>0]))});
   d.predict[!missing.ind]= NA;
@@ -20,15 +14,9 @@ score.nrmsd = function(pred_path, observed_path, truth_path)
 
 score.cor = function(pred_path, observed_path, truth_path)  
 {
-  d.predict = as.matrix(read.table( pred_path, sep="\t"));
-  d.true = as.matrix(read.table( truth_path, sep="\t"));
-  missing.ind = is.na(as.matrix(read.table( observed_path, sep="\t")));
-  
-  if(any(dim(d.true)!=dim(d.true))||any(dim(d.true)!=dim(missing.ind)))
-    stop("Please supply three matrices of equal size.");
-  
-  if(sum(is.na(d.predict))>0)
-    stop("Please provide a complete prediction.");
+  d.predict = as.matrix(read.csv( pred_path, sep="\t", row.names=1));
+  d.true = as.matrix(read.csv( truth_path, sep="\t", row.names=1));
+  missing.ind = is.na(as.matrix(read.csv( observed_path, sep="\t", row.names=1)));
   
   L = dim(d.true)[1]
   d.predict[!missing.ind]= NA;
@@ -36,27 +24,27 @@ score.cor = function(pred_path, observed_path, truth_path)
   cor.p = sapply(1:L,function(l){cor(d.predict[l,],d.true[l,],use = 'pairwise.complete.obs')});
   return(mean(cor.p));
 }
-
 get.score.sc1 = function(path_pred='/',path_obs='/',path_true='/')
 {
-  pred_file_all = sort(paste0(path_pred,dir(path_pred)));
+  #pred_file_all = sort(paste0(path_pred,dir(path_pred)));
   # observed_file_all = sort(paste0(path,"data_test_obs_",1:100,'.txt'));
-  observed_file_all = sort(paste0(path_obs,dir(path_obs)));
+  #observed_file_all = sort(paste0(path_obs,dir(path_obs)));
   truth_file = paste0(path_true,'data_test_true.txt');
-  nrmsd_all=NULL;
-  cor_all=NULL;
+  nrmsd.all=c()
+  cor.all=c()
   
-  for(i in 1:length(pred_file_all))
+  for(i in 1:100)
   {
-    pred_file=pred_file_all[i];
-    observed_file = observed_file_all[i];
+    pred_file = paste0(path_pred,sprintf('predictions_%s.tsv', i));
+    observed_file = paste0(path_obs,sprintf('data_test_obs_%s.txt', i));
+    #pred_file=pred_file_all[i];
+    #observed_file = observed_file_all[i];
     nrmsd.all = c(nrmsd.all,score.nrmsd(pred_file, observed_file, truth_file));  
     cor.all = c(cor.all,score.cor(pred_file, observed_file, truth_file));  
   }  
   
   return(list(nrmsd = mean(nrmsd.all),  cor = mean(cor.all) )); 
 }
-
 
 
 ###SC2 and SC3

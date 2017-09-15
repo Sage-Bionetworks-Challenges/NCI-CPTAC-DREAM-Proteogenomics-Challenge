@@ -28,23 +28,27 @@ def main():
 	os.system("rm -f %s/*" % testDataDir)
 
 	if args.round == '1':
+		sc1 = "syn10807805"
 		sc2 = "syn10617839"
 		sc3 = 'syn10617842'
 		replace = "_round_1"
 	elif args.round == '2':
+		sc1 = "syn10807805"
 		sc2 = 'syn10617840'
 		sc3 = 'syn10617843'
 		replace = "_round_2"
 	elif args.round == 'test':
+		sc1 = "syn10807805"
 		sc2 = 'syn10139559'
 		sc3 = 'syn10139567'
 	else:
+		sc1 = "syn10807814"
 		sc2 = 'syn10617841'
 		sc3 = 'syn10617844'
 		replace = "_final_round"
 
 	if args.sc == 'sc1':
-		downloadData(syn, "syn10164401",testDataDir)
+		downloadData(syn, sc1,testDataDir)
 	elif args.sc == 'sc2':
 		#downloadData(syn, sc2, testDataDir,replace)
 		downloadData(syn, sc2, testDataDir)

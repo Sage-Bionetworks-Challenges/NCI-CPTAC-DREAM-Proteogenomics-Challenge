@@ -19,23 +19,25 @@ def main():
 	if not os.path.exists(downloadDir):
 		os.mkdir(downloadDir)
 	
-	# downloadData(syn, "syn10165897",downloadDir)
-	# downloadData(syn, "syn10165898",downloadDir)
-	# downloadData(syn, "syn10165900",downloadDir)
-	downloadData(syn, "syn10164401",downloadDir)
+
+	#sc1 test
+	downloadData(syn, "syn10807805",downloadDir)
+	downloadData(syn, "syn10807065",downloadDir)
 	sc2_test = syn.get("syn10514976")
 	sc3_test = syn.get("syn10666694")
-	sc1 = syn.get("syn10164502")
 	if args.round == '1':
+		downloadData("syn10807065",downloadDir)
 		sc2 = syn.get("syn10763208")
 		sc3 = syn.get("syn10763237")
 	elif args.round == '2':
 		sc2 = syn.get("syn10763217")
 		sc3 = syn.get("syn10763243")
 	else:
+		downloadData(syn,"syn10807068",downloadDir)
+		downloadData(syn,"syn10807814",downloadDir)
 		sc2 = syn.get("syn10763225")
 		sc3 = syn.get("syn10763252")
-	shutil.copy(sc1.path, downloadDir)
+
 	shutil.copy(sc2.path, os.path.join(downloadDir, "prospective_ova_pro_gold.txt"))
 	shutil.copy(sc3.path, os.path.join(downloadDir, "prospective_ova_phospho_gold.txt"))
 	shutil.copy(sc2_test.path, os.path.join(downloadDir, "prospective_ova_pro_gold_complete.txt"))
