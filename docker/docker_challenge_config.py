@@ -199,36 +199,65 @@ def dockerRun(submission, scoring_sh, syn, client):
         errors = str(e) + "\n"
     #Create log file
     logFileName = submission.id + "_log.txt"
-    with open(logFileName, 'a') as logFile:
-        #While docker is still running (the docker python client doesn't update status)
-        #Add sleeps
-        if container is not None:
-            #with open(logFileName, 'a') as logFile:
-            while subprocess.Popen(['docker','inspect','-f','{{.State.Running}}',container.name],stdout = subprocess.PIPE).communicate()[0] == "true\n":
-                for line in container.logs(stream=True):
-                    logFile.write(line)
-                    logFile.flush()
-                    #Only store log file if > 0bytes
-                    statinfo = os.stat(logFileName)
-                    if statinfo.st_size > 0:
-                        ent = File(logFileName, parent = logFolderId)
-                        logs = syn.store(ent)
-            #Remove container and image after being done
-            container.remove()
-            try:
-                client.images.remove(dockerImage)
-            except:
-                print("Unable to remove image")
+    logSynId = None
+    #Create the logfile
+    openLog = open(logFileName,'w').close()
+    #While docker is still running (the docker python client doesn't update status)
+    #Add sleeps
+    if container is not None:
+        while subprocess.Popen(['docker','inspect','-f','{{.State.Running}}',container.name],stdout = subprocess.PIPE).communicate()[0] == "true\n":
+            logFileText = container.logs()
+            with open(logFileName,'w') as logFile:
+                logFile.write(logFileText)
+            statinfo = os.stat(logFileName)
+            #Only store log file if > 0bytes
+            if statinfo.st_size > 0 and statinfo.st_size/1000.0 <= 50:
+                ent = File(logFileName, parent = logFolderId)
+                try:
+                    logs = syn.store(ent)
+                    logSynId = logs.id
+                except synapseclient.exceptions.SynapseHTTPError as e:
+                    pass
+            time.sleep(60)
+
+        #Must run again to make sure all the logs are captured
+        logFileText = container.logs()
+        with open(logFileName,'w') as logFile:
+            logFile.write(logFileText)
         statinfo = os.stat(logFileName)
-        if statinfo.st_size == 0:
+        #Only store log file if > 0bytes
+        if statinfo.st_size > 0 and statinfo.st_size/1000.0 <= 50:
+            ent = File(logFileName, parent = logFolderId)
+            try:
+                logs = syn.store(ent)
+                logSynId = logs.id
+            except synapseclient.exceptions.SynapseHTTPError as e:
+                pass
+        container.remove()
+        try:
+            client.images.remove(dockerImage)
+        except:
+            print("Unable to remove image")
+
+    statinfo = os.stat(logFileName)
+    if statinfo.st_size == 0:
+        with open(logFileName,'w') as logFile:
             if errors is not None:
                 logFile.write(errors)
             else:
-                logFile.write("No Logs")
+                logFile.write("No Logs, or logs exceed size limit")
             logFile.flush()
             ent = File(logFileName, parent = logFolderId)
-            logs = syn.store(ent)    
+            try:
+                logs = syn.store(ent)
+                logSynId = logs.id
+            except synapseclient.exceptions.SynapseHTTPError as e:
+                pass
 
+    if logSynId is None:
+        logFile = synu.walk(syn, logFolderId)
+        logFiles = logFile.next()
+        logSynId = logFiles[2][0][1]
     #Zip up predictions and store it into CHALLENGE_PREDICTIONS_FOLDER
     if len(os.listdir(OUTPUT_DIR)) > 0:
         zipf = zipfile.ZipFile(submission.id + '_predictions.zip', 'w', zipfile.ZIP_DEFLATED)
@@ -243,7 +272,7 @@ def dockerRun(submission, scoring_sh, syn, client):
     else:
         prediction_synId = None
     os.remove(logFileName)
-    return(prediction_synId, logs.id)
+    return(prediction_synId, logSynId)
 
 
 
