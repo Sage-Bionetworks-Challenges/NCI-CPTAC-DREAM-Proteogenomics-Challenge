@@ -268,7 +268,7 @@ def dockerRun(submission, scoring_sh, syn, client):
         ent = File(submission.id + '_predictions.zip', parent = predFolderId)
         predictions = syn.store(ent)
         prediction_synId = predictions.id
-        os.system("rm -rf %s/*" % OUTPUT_DIR)
+        os.system("rm -rf %s" % OUTPUT_DIR)
         os.remove(submission.id + '_predictions.zip')
     else:
         prediction_synId = None
