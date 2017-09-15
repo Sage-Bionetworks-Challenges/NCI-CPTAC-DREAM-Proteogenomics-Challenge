@@ -7,6 +7,7 @@ import synapseutils as synu
 import zipfile
 import os
 import base64
+import time
 
 #Synapse Id of Challenge
 CHALLENGE_SYN_ID = "syn8228304"
