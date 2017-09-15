@@ -194,7 +194,7 @@ def dockerRun(submission, scoring_sh, syn, client):
     # Run docker image
     errors = None
     try:
-        container = client.containers.run(dockerImage, scoring_sh, detach=True,volumes = volumes, name=submission.id, network_disabled=True)
+        container = client.containers.run(dockerImage, scoring_sh, detach=True,volumes = volumes, name=submission.id + "_t" + str(int(time.time())), network_disabled=True)
     except docker.errors.APIError as e:
         container = None
         errors = str(e) + "\n"
