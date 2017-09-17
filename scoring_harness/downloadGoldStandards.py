@@ -19,14 +19,12 @@ def main():
 	if not os.path.exists(downloadDir):
 		os.mkdir(downloadDir)
 	
-
-	#sc1 test
+	#sc1 test, round1,2
 	downloadData(syn, "syn10807805",downloadDir)
 	downloadData(syn, "syn10807065",downloadDir)
 	sc2_test = syn.get("syn10514976")
 	sc3_test = syn.get("syn10666694")
 	if args.round == '1':
-		downloadData("syn10807065",downloadDir)
 		sc2 = syn.get("syn10763208")
 		sc3 = syn.get("syn10763237")
 	elif args.round == '2':

@@ -69,9 +69,9 @@ def _validate_func_helper(filePath, goldDf, predOrConf, column="proteinID", vari
 
 
 def validate_func1(dirName, goldstandardDir, column):
-    goldstandard_path = os.path.join(goldstandardDir, "data_test_true.txt")
-    goldDf = pd.read_csv(goldstandard_path, sep="\t",index_col=0)
     for num in range(1,101):
+        goldstandard_path = os.path.join(goldstandardDir, "data_test_true_%s.txt")
+        goldDf = pd.read_csv(goldstandard_path, sep="\t",index_col=0)   
         prediction_path = os.path.join(dirName,'predictions_%d.tsv' % num)
         confidence_path = os.path.join(dirName,'confidence_%d.tsv' % num)
         _validate_func_helper(prediction_path, goldDf, "predictions")
@@ -89,10 +89,11 @@ def validate_func2_3(dirName, goldstandard_path, column):
 def score1(dirName, goldstandardDir):
     ##Read in submission (submission.filePath)
     ##Score against goldstandard
-    goldstandard_path = os.path.join(goldstandardDir, "data_test_true.txt")
+    #goldstandard_path = os.path.join(goldstandardDir, "data_test_true.txt")
     sc1_nrmsd_scores = []
     sc1_corr_scores = []
     for num in range(1,101):
+        goldstandard_path = os.path.join(goldstandardDir, "data_test_true_%s.txt")
         prediction_path = os.path.join(dirName,'predictions_%d.tsv' % num)
         observed_path = os.path.join(goldstandardDir, "data_test_obs_%d.txt" % num)
         sc1_corr_scores.append(score_cor(prediction_path, observed_path, goldstandard_path)[0])
