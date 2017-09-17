@@ -24,6 +24,7 @@ score.cor = function(pred_path, observed_path, truth_path)
   cor.p = sapply(1:L,function(l){cor(d.predict[l,],d.true[l,],use = 'pairwise.complete.obs')});
   return(mean(cor.p));
 }
+#get.score.sc1 isn't used in the scoring harness
 get.score.sc1 = function(path_pred='/',path_obs='/',path_true='/')
 {
   #pred_file_all = sort(paste0(path_pred,dir(path_pred)));
