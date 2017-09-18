@@ -11,7 +11,7 @@
 #
 # Your credentials will be saved after which you may run this script with no credentials.
 # 
-# Author: chris.bare
+# Author: chris.bare, thomasyu888
 #
 ###############################################################################
 
@@ -49,7 +49,8 @@ import urllib
 import uuid
 import warnings
 import docker 
-
+from functools import partial
+from multiprocessing import Pool
 try:
     import docker_challenge_config as conf
 except Exception as ex1:
@@ -58,6 +59,10 @@ except Exception as ex1:
 
 import messages
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+LOG_DIR = os.path.join(SCRIPT_DIR,"log")
+if not os.path.exists(LOG_DIR):
+    os.mkdir(LOG_DIR)
 
 # the batch size can be bigger, we do this just to demonstrate batching
 BATCH_SIZE = 20
@@ -69,8 +74,7 @@ UUID_REGEX = re.compile('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f
 
 # A module level variable to hold the Synapse connection
 syn = None
-
-
+client = None
 def to_column_objects(leaderboard_columns):
     """
     Turns a list of dictionaries of column configuration information defined
@@ -167,7 +171,6 @@ def update_submissions_status_batch(evaluation, statuses):
             else:
                 raise
 
-
 class Query(object):
     """
     An object that helps with paging through annotation query results.
@@ -200,6 +203,7 @@ class Query(object):
         self.i += 1
         self.offset += 1
         return values
+
 
 def dockerstop(evaluation, syn, client, dry_run=False):
     if type(evaluation) != Evaluation:
@@ -258,7 +262,6 @@ def validate(evaluation, syn, client, canCancel, user, password, dry_run=False):
     print "-" * 60
     sys.stdout.flush()
 
-
     for submission, status in syn.getSubmissionBundles(evaluation, status='RECEIVED'):
 
         ## refetch the submission so that we get the file path
@@ -266,24 +269,24 @@ def validate(evaluation, syn, client, canCancel, user, password, dry_run=False):
         submission = syn.getSubmission(submission)
 
         print "validating", submission.id, submission.name
-        ex1 = None
+        ex1=None
         try:
-            is_valid, validation_message = conf.validate_docker(evaluation, submission, syn, client, user, password)
+            is_valid, validation_message = conf.validate_docker(evaluation, submission, syn, user, password)
         except Exception as ex1:
             is_valid = False
             print "Exception during validation:", type(ex1), ex1, ex1.message
             traceback.print_exc()
             validation_message = str(ex1)
 
-        #Status should be OPEN as the scoring harness will use VALIDATED/SCORED
         status.status = "OPEN" if is_valid else "INVALID"
-        if canCancel:
-            status.canCancel = True
 
         if not is_valid:
             failure_reason = {"FAILURE_REASON":validation_message}
-            add_annotations = synapseclient.annotations.to_submission_status_annotations(failure_reason,is_private=True)
-            status = update_single_submission_status(status, add_annotations)
+        else:
+            failure_reason = {"FAILURE_REASON":''}
+            
+        add_annotations = synapseclient.annotations.to_submission_status_annotations(failure_reason,is_private=True)
+        status = update_single_submission_status(status, add_annotations)
 
         if not dry_run:
             status = syn.store(status)
@@ -295,9 +298,9 @@ def validate(evaluation, syn, client, canCancel, user, password, dry_run=False):
                 userIds=[submission.userId],
                 username=get_user_name(profile),
                 queue_name=evaluation.name,
-                message=validation_message,
                 submission_id=submission.id,
-                submission_name=submission.name)
+                submission_name=submission.name,
+                message=validation_message)
         else:
             if isinstance(ex1, AssertionError):
                 sendTo = [submission.userId]
@@ -305,102 +308,117 @@ def validate(evaluation, syn, client, canCancel, user, password, dry_run=False):
                 sendTo = conf.ADMIN_USER_IDS
 
             messages.validation_failed(
-                userIds=[submission.userId],
-                username=get_user_name(profile),
+                userIds=sendTo,
+                username="Challenge Administrator",
                 queue_name=evaluation.name,
                 submission_id=submission.id,
                 submission_name=submission.name,
                 message=validation_message)
 
+#def parallel_run(submissionId, evaluation, syn, client, canCancel, dry_run=False):
+def parallel_run(submissionId, evaluation, syn, canCancel, userName, password, dry_run=False):
 
-def score(evaluation, syn, client, canCancel, dry_run=False):
+    client = docker.from_env()
+    client.login(userName, password, registry="http://docker.synapse.org")
+    submission = syn.getSubmission(submissionId)
+    status = syn.getSubmissionStatus(submissionId)
+    logFile = open(os.path.join(LOG_DIR,status['id'] + "_log.txt"),'w')
+    if canCancel:
+        status.canCancel = True
+    status.status = "EVALUATION_IN_PROGRESS"
+    startTime = {"RUN_START":int(time.time()*1000)}
+    add_annotations = synapseclient.annotations.to_submission_status_annotations(startTime,is_private=True)
+    status = update_single_submission_status(status, add_annotations)
+    status = syn.store(status)
 
+    status.status = "INVALID"
+
+    ## refetch the submission so that we get the file path
+    ## to be later replaced by a "downloadFiles" flag on getSubmissionBundles
+    submission = syn.getSubmission(submission)
+    #If submission_info is None, then there the code passed
+    submission_info = None
+    try:
+        score, message = conf.run_docker(evaluation, submission, syn, client)
+
+        logFile.write("scored: %s %s %s %s" % (submission.id, submission.name, submission.userId, str(score)))
+        logFile.flush()
+        ## fill in team in submission status annotations
+        if 'teamId' in submission:
+            team = syn.restGET('/team/{id}'.format(id=submission.teamId))
+            if 'name' in team:
+                score['team'] = team['name']
+            else:
+                score['team'] = submission.teamId
+        elif 'userId' in submission:
+            profile = syn.getUserProfile(submission.userId)
+            score['team'] = get_user_name(profile)
+        else:
+            score['team'] = '?'
+        score['RUN_END'] = int(time.time()*1000)
+
+        add_annotations = synapseclient.annotations.to_submission_status_annotations(score,is_private=True)
+        status = update_single_submission_status(status, add_annotations)
+        if score['PREDICTION_FILE'] is None:
+            status.status = "INVALID"
+        else:
+            status.status = "ACCEPTED"
+        if not dry_run and evaluation.id in conf.leaderboard_tables:
+            update_leaderboard_table(conf.leaderboard_tables[evaluation.id], submission, fields=score, dry_run=False)
+
+    except Exception as ex1:
+        logFile.write('\n\nError scoring submission %s %s:\n' % (submission.name, submission.id))
+        st = StringIO()
+        traceback.print_exc(file=st)
+        #sys.stderr.write(st.getvalue())
+        #sys.stderr.write('\n')
+        message = st.getvalue()
+        logFile.write(message)
+        logFile.flush()
+
+        if conf.ADMIN_USER_IDS:
+            submission_info = "submission id: %s\nsubmission name: %s\nsubmitted by user id: %s\n\n" % (submission.id, submission.name, submission.userId)
+            messages.error_notification(userIds=conf.ADMIN_USER_IDS, message=submission_info+st.getvalue(),queue_name=evaluation.name)
+
+    if not dry_run:
+        status = syn.store(status)
+
+    ## send message AFTER storing status to ensure we don't get repeat messages
+    profile = syn.getUserProfile(submission.userId)
+
+    if status.status == 'ACCEPTED':
+        messages.scoring_succeeded(
+            userIds=[submission.userId],
+            message=message,
+            username=get_user_name(profile),
+            queue_name=evaluation.name,
+            submission_name=submission.name,
+            submission_id=submission.id)
+    elif submission_info is None:
+        messages.scoring_error(
+            userIds=[submission.userId],
+            message=message,
+            username=get_user_name(profile),
+            queue_name=evaluation.name,
+            submission_name=submission.name,
+            submission_id=submission.id)
+
+def score(evaluation, syn, client, canCancel, threads, userName, password, dry_run=False):
     if type(evaluation) != Evaluation:
         evaluation = syn.getEvaluation(evaluation)
 
-    print '\n\nScoring ', evaluation.id, evaluation.name
+    print '\n\nDocker Running ', evaluation.id, evaluation.name
     print "-" * 60
     sys.stdout.flush()
 
+    allSubmissions = []
     for submission, status in syn.getSubmissionBundles(evaluation, status='OPEN'):
-        if canCancel:
-            status.canCancel = True
-        status.status = "EVALUATION_IN_PROGRESS"
-        startTime = {"RUN_START":int(time.time()*1000)}
-        add_annotations = synapseclient.annotations.to_submission_status_annotations(startTime,is_private=True)
-        status = update_single_submission_status(status, add_annotations)
-        status = syn.store(status)
-        status.status = "INVALID"
-        ## refetch the submission so that we get the file path
-        ## to be later replaced by a "downloadFiles" flag on getSubmissionBundles
-        submission = syn.getSubmission(submission)
+        allSubmissions.append(submission.id)
 
-        try:
-            score, message = conf.run_docker(evaluation, submission, syn, client)
-
-            print "scored:", submission.id, submission.name, submission.userId, score
-
-            ## fill in team in submission status annotations
-            if 'teamId' in submission:
-                team = syn.restGET('/team/{id}'.format(id=submission.teamId))
-                if 'name' in team:
-                    score['team'] = team['name']
-                else:
-                    score['team'] = submission.teamId
-            elif 'userId' in submission:
-                profile = syn.getUserProfile(submission.userId)
-                score['team'] = get_user_name(profile)
-            else:
-                score['team'] = '?'
-            add_annotations = synapseclient.annotations.to_submission_status_annotations(score,is_private=True)
-            status = update_single_submission_status(status, add_annotations)
-            if score['PREDICTION_FILE'] is None:
-                status.status = "INVALID"
-            else:
-                #Status should be accepted because the docker agent is different from the scoring harness
-                status.status = "ACCEPTED" 
-            score['RUN_END'] = int(time.time()*1000)
-            ## if there's a table configured, update it
-            if not dry_run and evaluation.id in conf.leaderboard_tables:
-                update_leaderboard_table(conf.leaderboard_tables[evaluation.id], submission, fields=score, dry_run=False)
-
-        except Exception as ex1:
-            sys.stderr.write('\n\nError scoring submission %s %s:\n' % (submission.name, submission.id))
-            st = StringIO()
-            traceback.print_exc(file=st)
-            sys.stderr.write(st.getvalue())
-            sys.stderr.write('\n')
-            message = st.getvalue()
-
-            if conf.ADMIN_USER_IDS:
-                submission_info = "submission id: %s\nsubmission name: %s\nsubmitted by user id: %s\n\n" % (submission.id, submission.name, submission.userId)
-                messages.error_notification(userIds=conf.ADMIN_USER_IDS, message=submission_info+st.getvalue())
-
-        if not dry_run:
-            status = syn.store(status)
-
-        ## send message AFTER storing status to ensure we don't get repeat messages
-        profile = syn.getUserProfile(submission.userId)
-
-        if status.status == 'ACCEPTED':
-            messages.scoring_succeeded(
-                userIds=[submission.userId],
-                message=message,
-                username=get_user_name(profile),
-                queue_name=evaluation.name,
-                submission_name=submission.name,
-                submission_id=submission.id)
-        else:
-            messages.scoring_error(
-                userIds=[submission.userId],
-                message=message,
-                username=get_user_name(profile),
-                queue_name=evaluation.name,
-                submission_name=submission.name,
-                submission_id=submission.id)
-
-    sys.stdout.write('\n')
-
+    #par_score_function = partial(parallel_run, evaluation=evaluation, syn=syn, client=client, canCancel=canCancel)
+    par_score_function = partial(parallel_run, evaluation=evaluation, syn=syn, canCancel=canCancel, userName=userName, password=password, dry_run=dry_run)
+    p = Pool(threads)
+    p.map(par_score_function,allSubmissions)
 
 def create_leaderboard_table(name, columns, parent, evaluation, dry_run=False):
     if not dry_run:
@@ -620,17 +638,20 @@ def command_validate(args):
     else:
         sys.stderr.write("\nValidate command requires either an evaluation ID or --all to validate all queues in the challenge")
 
+
 def command_score(args):
     if args.all:
         for queue_info in conf.config_evaluations:
-            score(queue_info['id'], args.syn, args.client, args.canCancel, dry_run=args.dry_run)
+            score(queue_info['id'], args.syn, args.client, args.canCancel, args.threads, args.user, args.password, dry_run=args.dry_run)
     elif args.evaluation:
-        score(args.evaluation, args.syn, args.client, args.canCancel, dry_run=args.dry_run)
+        score(args.evaluation, args.syn, args.client, args.canCancel, args.threads, args.user, args.password, dry_run=args.dry_run)
     else:
         sys.stderr.write("\Score command requires either an evaluation ID or --all to score all queues in the challenge")
 
+
 def command_rank(args):
     raise NotImplementedError('Implement a ranking function for your challenge')
+
 
 def command_leaderboard(args):
     ## show columns specific to an evaluation, if available
@@ -644,8 +665,10 @@ def command_leaderboard(args):
     else:
         query(args.evaluation, columns=leaderboard_cols)
 
+
 def command_archive(args):
     archive(args.evaluation, args.destination, name=args.name, query=args.query)
+
 
 ## ==================================================
 ##  main method
@@ -657,6 +680,7 @@ def main():
         sys.stderr.write("Please configure your challenge. See sample_challenge.py for an example.")
 
     global syn
+    global client
 
     parser = argparse.ArgumentParser()
 
@@ -668,6 +692,7 @@ def main():
     parser.add_argument("--dry-run", help="Perform the requested command without updating anything in Synapse", action="store_true", default=False)
     parser.add_argument("--debug", help="Show verbose error output from Synapse API calls", action="store_true", default=False)
     parser.add_argument("--canCancel", action="store_true", default=False)
+    parser.add_argument("--threads", type=int, default=1)
 
     subparsers = parser.add_subparsers(title="subcommand")
 
@@ -689,23 +714,21 @@ def main():
     parser_reset.add_argument("--rescore", metavar="EVALUATION-ID", type=int, nargs='*', help="One or more evaluation IDs to rescore")
     parser_reset.set_defaults(func=command_reset)
 
+    parser_dockerstop = subparsers.add_parser('dockerstop', help="Stop all submissions (Docker container) marked cancelRequeste=True")
+    parser_dockerstop.add_argument("evaluation", metavar="EVALUATION-ID", nargs='?', default=None, )
+    parser_dockerstop.add_argument("--all", action="store_true", default=False)
+    parser_dockerstop.set_defaults(func=command_dockerstop)
+
     parser_validate = subparsers.add_parser('validate', help="Validate all RECEIVED submissions to an evaluation")
     parser_validate.add_argument("evaluation", metavar="EVALUATION-ID", nargs='?', default=None, )
     parser_validate.add_argument("--all", action="store_true", default=False)
-    parser_validate.add_argument("--canCancel", action="store_true", default=False)
     parser_validate.set_defaults(func=command_validate)
 
     parser_score = subparsers.add_parser('score', help="Score all VALIDATED submissions to an evaluation")
     parser_score.add_argument("evaluation", metavar="EVALUATION-ID", nargs='?', default=None)
     parser_score.add_argument("--all", action="store_true", default=False)
-    parser_score.add_argument("--canCancel", action="store_true", default=False)
     parser_score.set_defaults(func=command_score)
 
-    parser_dockerstop = subparsers.add_parser('dockerstop', help="Stop all submissions (Docker container) marked cancelRequeste=True")
-    parser_dockerstop.add_argument("evaluation", metavar="EVALUATION-ID", nargs='?', default=None, )
-    parser_dockerstop.add_argument("--all", action="store_true", default=False)
-    parser_dockerstop.set_defaults(func=command_dockerstop)
-    
     parser_rank = subparsers.add_parser('rank', help="Rank all SCORED submissions to an evaluation")
     parser_rank.add_argument("evaluation", metavar="EVALUATION-ID", default=None)
     parser_rank.set_defaults(func=command_rank)
@@ -749,6 +772,7 @@ def main():
         #Add syn and client into arguments
         args.syn = syn
         args.client = client
+        ## initialize messages
         messages.syn = syn
         messages.dry_run = args.dry_run
         messages.send_messages = args.send_messages
@@ -763,7 +787,6 @@ def main():
         traceback.print_exc(file=st)
         sys.stderr.write(st.getvalue())
         sys.stderr.write('\n')
-
         if conf.ADMIN_USER_IDS:
             messages.error_notification(userIds=conf.ADMIN_USER_IDS, message=st.getvalue(), queue_name=conf.CHALLENGE_NAME)
 
