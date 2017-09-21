@@ -18,7 +18,8 @@ python $script_dir/docker_challenge.py --acknowledge-receipt --canCancel -u $SYN
 #--------------------
 #Score submissions
 #--------------------
-python $script_dir/docker_challenge.py --canCancel -u $SYNAPSE_USER -p $SYNAPSE_PASS --send-messages --notifications score 8720143 >> $script_dir/log/score.log 2>&1
+#python $script_dir/docker_challenge.py --canCancel -u $SYNAPSE_USER -p $SYNAPSE_PASS --send-messages --notifications score 8720143 >> $script_dir/log/score.log 2>&1
+python $script_dir/docker_challengeThreaded.py --threads 4 --canCancel -u $SYNAPSE_USER -p $SYNAPSE_PASS --send-messages --notifications score 8720143 >> $script_dir/log/score.log 2>&1
 
 #--------------------
 #Stop submissions
