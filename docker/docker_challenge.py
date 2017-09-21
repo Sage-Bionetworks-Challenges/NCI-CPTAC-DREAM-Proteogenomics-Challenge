@@ -326,6 +326,9 @@ def score(evaluation, syn, client, canCancel, dry_run=False):
         if canCancel:
             status.canCancel = True
         status.status = "EVALUATION_IN_PROGRESS"
+        startTime = {"RUN_START":int(time.time()*1000)}
+        add_annotations = synapseclient.annotations.to_submission_status_annotations(startTime,is_private=True)
+        status = update_single_submission_status(status, add_annotations)
         status = syn.store(status)
         status.status = "INVALID"
         ## refetch the submission so that we get the file path
@@ -356,7 +359,7 @@ def score(evaluation, syn, client, canCancel, dry_run=False):
             else:
                 #Status should be accepted because the docker agent is different from the scoring harness
                 status.status = "ACCEPTED" 
-
+            score['RUN_END'] = int(time.time()*1000)
             ## if there's a table configured, update it
             if not dry_run and evaluation.id in conf.leaderboard_tables:
                 update_leaderboard_table(conf.leaderboard_tables[evaluation.id], submission, fields=score, dry_run=False)
