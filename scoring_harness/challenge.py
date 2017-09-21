@@ -234,8 +234,8 @@ def validate(evaluation, canCancel, dry_run=False):
             failure_reason = {"FAILURE_REASON":validation_message}
         else:
             failure_reason = {"FAILURE_REASON":''}
-        add_annotations = synapseclient.annotations.to_submission_status_annotations(failure_reason,is_private=True)
-        status = update_single_submission_status(status, add_annotations)
+        add_annotations = synapseclient.annotations.to_submission_status_annotations(failure_reason,is_private=False)
+        status = update_single_submission_status(status, add_annotations, force=True)
 
         if not dry_run:
             status = syn.store(status)
@@ -300,8 +300,8 @@ def score(evaluation, canCancel, dry_run=False):
                 score['team'] = get_user_name(profile)
             else:
                 score['team'] = '?'
-            add_annotations = synapseclient.annotations.to_submission_status_annotations(score,is_private=True)
-            status = update_single_submission_status(status, add_annotations)
+            add_annotations = synapseclient.annotations.to_submission_status_annotations(score,is_private=False)
+            status = update_single_submission_status(status, add_annotations, force=True)
 
             status.status = "SCORED"
             ### Add in DATE as a public annotation and change team annotation to not private
