@@ -191,14 +191,14 @@ evaluation_queues = [
     },
     {
         'id':9606531,
-        'scoring_func':score2_3,
+        'scoring_func':score2,
         'validation_func':validate_func2_3,
         'column':'proteinID',
         'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/prospective_ova_pro_gold_complete.txt')
     },
     {
         'id':9606532,
-        'scoring_func':score2_3,
+        'scoring_func':score3,
         'validation_func':validate_func2_3,
         'column':'phosphoID',
         'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/prospective_ova_phospho_gold_complete.txt')
