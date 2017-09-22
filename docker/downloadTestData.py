@@ -53,6 +53,7 @@ def main():
 
 	if args.sc == 'sc1':
 		downloadData(syn, sc1,testDataDir)
+		os.remove(os.path.join(testDataDir,"data_true.txt"))
 	elif args.sc == 'sc2':
 		#downloadData(syn, sc2, testDataDir,replace)
 		downloadData(syn, sc2, testDataDir)
