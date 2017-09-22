@@ -11,6 +11,9 @@ nrmse_by_row = robjects.r('NRMSE_by_row')
 score_cor = robjects.r('score.cor')
 score_nrmse = robjects.r('score.nrmsd')
 
+corr_by_row_sc3 = robjects.r('correlation_by_row_ALL_OBSERVED')
+nrmse_by_row_sc3 = robjects.r('NRMSE_by_row_ALL_OBSERVED')
+
 ##-----------------------------------------------------------------------------
 ##
 ## challenge specific code and configuration
@@ -100,7 +103,7 @@ def score1(dirName, goldstandardDir):
         sc1_nrmsd_scores.append(score_nrmse(prediction_path, observed_path, goldstandard_path)[0])
     return(pd.np.mean(sc1_corr_scores), pd.np.mean(sc1_nrmsd_scores))
 
-def score2_3(dirName, goldstandard_path):
+def score2(dirName, goldstandard_path):
     ##Read in submission (submission.filePath)
     ##Score against goldstandard
     prediction_path = os.path.join(dirName,'predictions.tsv')
@@ -108,6 +111,13 @@ def score2_3(dirName, goldstandard_path):
     rmse = nrmse_by_row(prediction_path, goldstandard_path)[0]
     return(corr, rmse)
 
+def score3(dirName, goldstandard_path):
+    ##Read in submission (submission.filePath)
+    ##Score against goldstandard
+    prediction_path = os.path.join(dirName,'predictions.tsv')=
+    corr = corr_by_row_sc3(prediction_path, goldstandard_path)[0]
+    rmse = nrmse_by_row_sc3(prediction_path, goldstandard_path)[0]
+    return(corr, rmse)
 #3 weeks
 #quota =  
 # {u'firstRoundStart': u'2017-07-14T00:00:00.000Z',
@@ -130,14 +140,14 @@ evaluation_queues = [
     },
     {
         'id':8720145,
-        'scoring_func':score2_3,
+        'scoring_func':score2,
         'validation_func':validate_func2_3,
         'column':'proteinID',
         'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/prospective_ova_pro_gold.txt')
     },
     {
         'id':8720149,
-        'scoring_func':score2_3,
+        'scoring_func':score3,
         'validation_func':validate_func2_3,
         'column':'phosphoID',
         'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/prospective_ova_phospho_gold.txt')
