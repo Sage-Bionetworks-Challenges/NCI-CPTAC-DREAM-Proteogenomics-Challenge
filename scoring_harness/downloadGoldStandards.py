@@ -12,13 +12,14 @@ def downloadData(syn, parentId, testDataDir):
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("round", help="Round", choices=['1','2',"final"])
-	parser.add_argument("--express", help="Express lane", action="store_true", default=False)
 	args = parser.parse_args()
 	syn = synapseclient.login()
 	downloadDir = os.path.join(os.path.dirname(os.path.abspath(__file__)),"goldstandard")
+	expressDir = os.path.join(downloadDir,"express")
 	if not os.path.exists(downloadDir):
 		os.mkdir(downloadDir)
-	
+	if not os.path.exists(expressDir):
+		os.mkdir(expressDir)
 	#sc1 test, round1,2
 	downloadData(syn, "syn10807805",downloadDir)
 	downloadData(syn, "syn10807065",downloadDir)
@@ -40,6 +41,16 @@ def main():
 	shutil.copy(sc3.path, os.path.join(downloadDir, "prospective_ova_phospho_gold.txt"))
 	shutil.copy(sc2_test.path, os.path.join(downloadDir, "prospective_ova_pro_gold_complete.txt"))
 	shutil.copy(sc3_test.path, os.path.join(downloadDir, "prospective_ova_phospho_gold_complete.txt"))
+
+	#Express lane data
+	downloadData(syn, "syn10139511",expressDir)
+	for i in range(1,11):
+		shutil.copy(os.path.join(expressDir,"data_true.txt"),os.path.join(expressDir,"data_test_true_%s.txt" % i)) 
+	sc2 = syn.get("syn10514979")
+	shutil.copy(sc2.path, os.path.join(expressDir, "prospective_ova_pro_gold_express.txt"))
+	sc3 = syn.get("syn10666613")
+	shutil.copy(sc3.path, os.path.join(expressDir, "prospective_ova_phospho_gold_express.txt"))
+
 	# if args.express:
 	# 	shutil.copy(cna.path, testDataDir)
 	# 	shutil.copy(proteome.path, "%s/pros_ova_proteome_sort_common_gene_6577.txt" % testDataDir)

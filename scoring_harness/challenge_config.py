@@ -155,29 +155,29 @@ evaluation_queues = [
 # Proteogenomics Subchallenge 1 Express Lane (9604716)
 # Proteogenomics Subchallenge 2 Express Lane (9604717)
 # Proteogenomics Subchallenge 3 Express Lane (9604718)
-    # {
-    #     'id':9604716,
-    #     'scoring_func':None,
-    #     'validation_func':validate_func1,
-    #     'column':'proteinID',
-    #     'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard')
+    {
+        'id':9604716,
+        'scoring_func':None,
+        'validation_func':validate_func1,
+        'column':'proteinID',
+        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/express')
 
-    # },
-    # {
-    #     'id':9604717,
-    #     'scoring_func':None,
-    #     'validation_func':validate_func2_3,
-    #     'column':'proteinID',
-    #     'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/prospective_ova_pro_gold_express.txt')
-    # },
-    # {
-    #     'id':9604718,
-    #     'scoring_func':None,
-    #     'validation_func':validate_func2_3,
-    #     'column':'phosphoID',
-    #     'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/prospective_ova_phospho_gold_express.txt')
+    },
+    {
+        'id':9604717,
+        'scoring_func':None,
+        'validation_func':validate_func2_3,
+        'column':'proteinID',
+        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/express/prospective_ova_pro_gold_express.txt')
+    },
+    {
+        'id':9604718,
+        'scoring_func':None,
+        'validation_func':validate_func2_3,
+        'column':'phosphoID',
+        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/express/prospective_ova_phospho_gold_express.txt')
 
-    # },
+    },
 # Proteogenomics Subchallenge 1 Internal (9606530)
 # Proteogenomics Subchallenge 2 Internal (9606531)
 # Proteogenomics Subchallenge 3 Internal (9606532)

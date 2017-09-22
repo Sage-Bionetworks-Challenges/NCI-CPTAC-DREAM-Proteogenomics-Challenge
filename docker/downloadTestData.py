@@ -26,37 +26,46 @@ def main():
 	if not os.path.exists(testDataDir):
 		os.mkdir(testDataDir)
 	os.system("rm -f %s/*" % testDataDir)
-
-	if args.round == '1':
-		sc1 = "syn10807805"
-		sc2 = "syn10617839"
-		sc3 = 'syn10617842'
-		replace = "_round_1"
-	elif args.round == '2':
-		sc1 = "syn10807805"
-		sc2 = 'syn10617840'
-		sc3 = 'syn10617843'
-		replace = "_round_2"
-	elif args.round == 'test':
-		sc1 = "syn10807805"
-		sc2 = 'syn10139559'
-		sc3 = 'syn10139567'
+	if args.express:
+		sc1 = "syn10139511"
+		sc2 = "syn10139526"
+		sc3 = "syn10139541"
 	else:
-		sc1 = "syn10807814"
-		sc2 = 'syn10617841'
-		sc3 = 'syn10617844'
-		replace = "_final_round"
+		if args.round == '1':
+			sc1 = "syn10807805"
+			sc2 = "syn10617839"
+			sc3 = 'syn10617842'
+			replace = "_round_1"
+		elif args.round == '2':
+			sc1 = "syn10807805"
+			sc2 = 'syn10617840'
+			sc3 = 'syn10617843'
+			replace = "_round_2"
+		elif args.round == 'test':
+			sc1 = "syn10807805"
+			sc2 = 'syn10139559'
+			sc3 = 'syn10139567'
+		else:
+			sc1 = "syn10807814"
+			sc2 = 'syn10617841'
+			sc3 = 'syn10617844'
+			replace = "_final_round"
 
 	if args.sc == 'sc1':
 		downloadData(syn, sc1,testDataDir)
 	elif args.sc == 'sc2':
 		#downloadData(syn, sc2, testDataDir,replace)
 		downloadData(syn, sc2, testDataDir)
+		if args.express:
+			os.rename(os.path.join(testDataDir,"retrospective_ova_CNA_sort_common_gene_11859.txt"),os.path.join(testDataDir,"prospective_ova_CNA_median_sort_common_gene_11859.txt"))
+			os.rename(os.path.join(testDataDir,"retrospective_ova_rna_seq_sort_common_gene_15121.txt"),os.path.join(testDataDir,"prospective_ova_rna_seq_sort_common_gene_15121.txt"))
 	else:
 		#downloadData(syn, sc3, testDataDir,replace)
 		downloadData(syn, sc3, testDataDir)
-
-
+		if args.express:
+			os.rename(os.path.join(testDataDir,"retrospective_ova_CNA_sort_common_gene_11859.txt"),os.path.join(testDataDir,"prospective_ova_CNA_median_sort_common_gene_11859.txt"))
+			os.rename(os.path.join(testDataDir,"retrospective_ova_rna_seq_sort_common_gene_15121.txt"),os.path.join(testDataDir,"prospective_ova_rna_seq_sort_common_gene_15121.txt"))
+			os.rename(os.path.join(testDataDir,"retrospective_ova_PNNL_proteome_sort_common_gene_7061.txt"),os.path.join(testDataDir,"prospective_ova_proteome_sort_common_gene_7061.txt"))
 
 	# if args.express:
 	# 	shutil.copy(cna.path, testDataDir)
