@@ -48,7 +48,7 @@ get.score.sc1 = function(path_pred='/',path_obs='/',path_true='/')
 }
 
 
-###SC2 and SC3
+###  SC2 
 ################################## load pearson correlation function ##################################
 correlation_by_row <- function(pred_path, truth_path) {
   prediction <- read.csv( pred_path, row.names = 1 , check.names = F, sep="\t") 
@@ -91,4 +91,56 @@ NRMSE_by_row <- function(pred_path, truth_path)  {
   return(mean(nrmse_vec))
 }
 #result_nrmse <- NRMSE_by_row("predictions.tsv", "prospective_ova_proteome_sort_common_gene_7061.txt")
+
+
+
+###  SC3
+################################## load pearson correlation function ##################################
+correlation_by_row_ALL_OBSERVED <- function(pred_path, truth_path) {
+  prediction <- read.csv( pred_path, row.names = 1 , check.names = F, sep="\t") 
+  test_prot  <- read.csv( truth_path, row.names = 1 , check.names = F, sep="\t")
+  #common_protein <- intersect(rownames(prediction), rownames(test_prot))
+  prediction <- prediction[rownames(test_prot), colnames(test_prot)]
+  test_prot <- test_prot[rownames(test_prot), colnames(test_prot)]
+  
+  mat1 <- as.matrix(prediction)
+  mat2 <- as.matrix(test_prot) 
+  
+  mat2 <- mat2[complete.cases(mat2), ]
+  mat1 <- mat1[rownames(mat2), ]
+  
+  corr_vec <- c()
+  for(i in 1:length(mat1[ ,1]) ) {
+    temp <- cor.test(mat1[ i, ], mat2[ i , ])
+    pcorr <- temp$estimate # pearson correlation
+    corr_vec <- c(corr_vec , pcorr)
+  }
+  names(corr_vec) <- rownames(mat1)
+  return(mean(corr_vec))
+}
+
+########################################## load RMSE function #########################################
+NRMSE_by_row_ALL_OBSERVED <- function(pred_path, truth_path)  {
+  suppressPackageStartupMessages(library(hydroGOF))
+  prediction <- read.csv( pred_path, row.names = 1 , check.names = F, sep="\t") 
+  test_prot  <- read.csv( truth_path, row.names = 1 , check.names = F, sep="\t")
+  common_protein <- intersect(rownames(prediction), rownames(test_prot))
+  prediction <- prediction[common_protein , colnames(test_prot) ]
+  test_prot <- test_prot[common_protein , colnames(test_prot)]
+  mat1 <- as.matrix(prediction)
+  mat2 <- as.matrix(test_prot) 
+  
+  mat2 <- mat2[complete.cases(mat2), ]
+  mat1 <- mat1[rownames(mat2), ]
+  
+  nrmse_vec <- c()
+  for(i in 1:length(mat1[ ,1]) ) {
+    temp <- hydroGOF::rmse(mat1[i,], mat2[i,],na.rm=T)
+    nrmse_vec <- c(nrmse_vec , temp/(max(mat2[i,],na.rm=T)-min(mat2[i,],na.rm=T)))
+  }
+  names(nrmse_vec) <- rownames(mat1)
+  return(mean(nrmse_vec))
+}
+
+
 
