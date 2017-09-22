@@ -114,7 +114,7 @@ def score2(dirName, goldstandard_path):
 def score3(dirName, goldstandard_path):
     ##Read in submission (submission.filePath)
     ##Score against goldstandard
-    prediction_path = os.path.join(dirName,'predictions.tsv')=
+    prediction_path = os.path.join(dirName,'predictions.tsv')
     corr = corr_by_row_sc3(prediction_path, goldstandard_path)[0]
     rmse = nrmse_by_row_sc3(prediction_path, goldstandard_path)[0]
     return(corr, rmse)
