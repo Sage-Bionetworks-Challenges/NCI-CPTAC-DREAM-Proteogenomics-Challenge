@@ -154,7 +154,7 @@ correlation_by_row_less30percMissing <- function(pred_path, truth_path) {
   mat1 <- as.matrix(prediction)
   mat2 <- as.matrix(test_prot) 
   
-  mat2 <- mat2[which(rowMeans(!is.na(mat2)) > 0.7),]
+  mat2 <- mat2[which(rowMeans(is.na(mat2)) < 0.3), ]
   mat1 <- mat1[rownames(mat2), ]
   
   corr_vec <- c()
@@ -178,7 +178,7 @@ NRMSE_by_row_ALL_less30percMissing <- function(pred_path, truth_path)  {
   mat1 <- as.matrix(prediction)
   mat2 <- as.matrix(test_prot) 
   
-  mat2 <- mat2[which(rowMeans(!is.na(mat2)) > 0.7),]
+  mat2 <- mat2[which(rowMeans(is.na(mat2)) < 0.3), ]
   mat1 <- mat1[rownames(mat2), ]
   
   nrmse_vec <- c()
