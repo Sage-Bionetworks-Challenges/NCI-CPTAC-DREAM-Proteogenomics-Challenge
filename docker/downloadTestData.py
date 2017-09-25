@@ -53,10 +53,17 @@ def main():
 
 	if args.sc == 'sc1':
 		downloadData(syn, sc1,testDataDir)
+		removeFile = os.path.join(testDataDir, "data_true.txt")
 	elif args.sc == 'sc2':
 		downloadData(syn, sc2, testDataDir)
+		removeFile = os.path.join(testDataDir, "prospective_ova_pro_gold_express.txt")
 	else:
 		downloadData(syn, sc3, testDataDir)
+		removeFile = os.path.join(testDataDir, "prospective_ova_phospho_gold_express.txt")
+	
+	if args.express:
+		os.remove(removeFile)
+
 
 if __name__ == '__main__':
 	main()
