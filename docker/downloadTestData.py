@@ -27,9 +27,9 @@ def main():
 		os.mkdir(testDataDir)
 	os.system("rm -f %s/*" % testDataDir)
 	if args.express:
-		sc1 = "syn10139511"
-		sc2 = "syn10139526"
-		sc3 = "syn10139541"
+		sc1 = "syn10902163"
+		sc2 = "syn10902231"
+		sc3 = "syn10902232"
 	else:
 		if args.round == '1':
 			sc1 = "syn10807805"
@@ -53,30 +53,10 @@ def main():
 
 	if args.sc == 'sc1':
 		downloadData(syn, sc1,testDataDir)
-		os.remove(os.path.join(testDataDir,"data_true.txt"))
 	elif args.sc == 'sc2':
-		#downloadData(syn, sc2, testDataDir,replace)
 		downloadData(syn, sc2, testDataDir)
-		if args.express:
-			os.rename(os.path.join(testDataDir,"retrospective_ova_CNA_sort_common_gene_11859.txt"),os.path.join(testDataDir,"prospective_ova_CNA_median_sort_common_gene_11859.txt"))
-			os.rename(os.path.join(testDataDir,"retrospective_ova_rna_seq_sort_common_gene_15121.txt"),os.path.join(testDataDir,"prospective_ova_rna_seq_sort_common_gene_15121.txt"))
 	else:
-		#downloadData(syn, sc3, testDataDir,replace)
 		downloadData(syn, sc3, testDataDir)
-		if args.express:
-			os.rename(os.path.join(testDataDir,"retrospective_ova_CNA_sort_common_gene_11859.txt"),os.path.join(testDataDir,"prospective_ova_CNA_median_sort_common_gene_11859.txt"))
-			os.rename(os.path.join(testDataDir,"retrospective_ova_rna_seq_sort_common_gene_15121.txt"),os.path.join(testDataDir,"prospective_ova_rna_seq_sort_common_gene_15121.txt"))
-			os.rename(os.path.join(testDataDir,"retrospective_ova_PNNL_proteome_sort_common_gene_7061.txt"),os.path.join(testDataDir,"prospective_ova_proteome_sort_common_gene_7061.txt"))
-
-	# if args.express:
-	# 	shutil.copy(cna.path, testDataDir)
-	# 	shutil.copy(proteome.path, "%s/pros_ova_proteome_sort_common_gene_6577.txt" % testDataDir)
-	# 	shutil.copy(rna.path, testDataDir)
-	# else:
-	# 	shutil.copy(cna.path, testDataDir)
-	# 	shutil.copy(proteome.path,  "%s/pros_ova_proteome_sort_common_gene_6577.txt" % testDataDir)
-	# 	shutil.copy(rna.path, testDataDir)
-
 
 if __name__ == '__main__':
 	main()
