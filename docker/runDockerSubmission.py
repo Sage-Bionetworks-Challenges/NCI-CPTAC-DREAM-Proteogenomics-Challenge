@@ -190,17 +190,18 @@ def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, 
     #         logSynId = logFiles[2][0][1]
 
     #Zip up predictions and store it into CHALLENGE_PREDICTIONS_FOLDER
-    if os.path.exists(os.path.join(output_dir,"predictions.tsv")):
+    if len(os.listdir(output_dir)) > 0:
         zipf = zipfile.ZipFile(submission.id + '_predictions.zip', 'w', zipfile.ZIP_DEFLATED)
-        zipf.write(os.path.join(output_dir,"predictions.tsv"), "predictions.tsv")
+        zipdir(output_dir, zipf)
         zipf.close()
+
         ent = File(submission.id + '_predictions.zip', parent = predFolderId)
         predictions = syn.store(ent)
         prediction_synId = predictions.id
+        os.system("rm -rf %s" % output_dir)
         os.remove(submission.id + '_predictions.zip')
     else:
         prediction_synId = None
-    os.system("rm -rf %s" % output_dir)
     #Remove log file and prediction file
     os.remove(logFileName)
     if prediction_synId is not None:
