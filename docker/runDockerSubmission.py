@@ -174,16 +174,15 @@ def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, 
             logFile.flush()
             ent = File(logFileName, parent = logFolderId)
             logSynId = attemptStoreLog(syn, ent)
-
-    # if logSynId is None:
-    #     logFile = synu.walk(syn, logFolderId)
-    #     logFiles = logFile.next()
-    #     if len(logFiles[2]) == 0:
-    #         ent = File(logFileName, parent = logFolderId)
-    #         logs = syn.store(ent)
-    #         logSynId = logs.id
-    #     else:
-    #         logSynId = logFiles[2][0][1]
+    if logSynId is None:
+        logFile = synu.walk(syn, logFolderId)
+        logFiles = logFile.next()
+        if len(logFiles[2]) == 0:
+            ent = File(logFileName, parent = logFolderId)
+            logs = syn.store(ent)
+            logSynId = logs.id
+        else:
+            logSynId = logFiles[2][0][1]
         
     #Zip up predictions and store it into CHALLENGE_PREDICTIONS_FOLDER
     if os.path.exists(os.path.join(output_dir,"predictions.tsv")):
