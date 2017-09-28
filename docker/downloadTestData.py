@@ -54,6 +54,9 @@ def main():
 	if args.sc == 'sc1':
 		downloadData(syn, sc1,testDataDir)
 		removeFile = os.path.join(testDataDir, "data_true.txt")
+		if args.express:
+			for i in range(1,101):
+				os.rename(os.path.join(testDataDir, "data_obs_%s.txt" % i), os.path.join(testDataDir, "data_test_obs_%s.txt" % i))
 	elif args.sc == 'sc2':
 		downloadData(syn, sc2, testDataDir)
 		removeFile = os.path.join(testDataDir, "prospective_ova_pro_gold_express.txt")

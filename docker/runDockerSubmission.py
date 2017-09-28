@@ -188,7 +188,7 @@ def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, 
     #         logSynId = logs.id
     #     else:
     #         logSynId = logFiles[2][0][1]
-        
+
     #Zip up predictions and store it into CHALLENGE_PREDICTIONS_FOLDER
     if os.path.exists(os.path.join(output_dir,"predictions.tsv")):
         zipf = zipfile.ZipFile(submission.id + '_predictions.zip', 'w', zipfile.ZIP_DEFLATED)
@@ -206,7 +206,7 @@ def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, 
     if prediction_synId is not None:
         message = "Your prediction file has been stored, but you will not have access to it."
     else:
-        message = "No prediction file generated, please check your log file: https://www.synapse.org/#!Synapse:%s" % log_synId
+        message = "No prediction file generated, please check your log file: https://www.synapse.org/#!Synapse:%s" % logSynId
 
     return({"PREDICTION_FILE":prediction_synId, "LOG_FILE":logSynId}, message)
 

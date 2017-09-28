@@ -48,9 +48,13 @@ ADMIN_USER_IDS = [3324230,3360851]
 ## every time the script starts and you can link the challenge queues to
 ## the correct scoring/validation functions.  Predictions will be validated and 
 
-def _validate_func_helper(filePath, goldDf, predOrConf, column="proteinID", varianceCheck=False):
+def _validate_func_helper(filePath, goldDf, predOrConf, column="proteinID", varianceCheck=False, scoring_sc1=True):
     fileName = os.path.basename(filePath)
-    assert os.path.isfile(filePath), "%s file must be named %s, and your model must generate %s_{1..100}.tsv" % (predOrConf, fileName, predOrConf)
+    if scoring_sc1:
+        assert os.path.isfile(filePath), "%s file must be named %s, and your model must generate %s_{1..100}.tsv" % (predOrConf, fileName, predOrConf)
+    else:
+        assert os.path.isfile(filePath), "%s file must be named %s, and your model must generate %s.tsv" % (predOrConf, fileName, predOrConf)
+
     assert os.stat(filePath).st_size > 0, "%s: Can't be an empty file" % fileName
     try :
         fileDf = pd.read_csv(filePath, sep="\t",header=None)
@@ -85,8 +89,8 @@ def validate_func2_3(dirName, goldstandard_path, column):
     goldDf = pd.read_csv(goldstandard_path, sep="\t",index_col=0)
     prediction_path = os.path.join(dirName,'predictions.tsv')
     confidence_path = os.path.join(dirName,'confidence.tsv')
-    _validate_func_helper(prediction_path, goldDf, "predictions", column=column, varianceCheck=True)
-    _validate_func_helper(confidence_path, goldDf, "confidence", column=column)
+    _validate_func_helper(prediction_path, goldDf, "predictions", column=column, varianceCheck=True, scoring_sc1=False)
+    _validate_func_helper(confidence_path, goldDf, "confidence", column=column, scoring_sc1=False)
     return(True,"Passed Validation")
 
 def score1(dirName, goldstandardDir):
