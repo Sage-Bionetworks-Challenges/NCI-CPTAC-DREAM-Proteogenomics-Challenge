@@ -202,7 +202,7 @@ def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, 
     if prediction_synId is not None:
         message = "Your prediction file has been stored, but you will not have access to it."
     else:
-        message = "No prediction file generated, please check your log file: https://www.synapse.org/#!Synapse:%s" % log_synId
+        message = "No prediction file generated, please check your log file: https://www.synapse.org/#!Synapse:%s" % logSynId
 
     return({"PREDICTION_FILE":prediction_synId, "LOG_FILE":logSynId}, message)
 
