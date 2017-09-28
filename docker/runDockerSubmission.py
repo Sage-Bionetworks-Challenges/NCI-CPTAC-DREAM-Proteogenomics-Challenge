@@ -27,6 +27,12 @@ ADMIN_USER_IDS = ["3324230"]
 
 CHALLENGE_NAME = "MM Challenge"
 
+def zipdir(path, ziph):
+    # ziph is zipfile handle
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            ziph.write(os.path.join(root, file),os.path.join(root, file).replace(path+"/",""))
+
 def get_user_name(profile):
     names = []
     if 'firstName' in profile and profile['firstName'] and profile['firstName'].strip():
