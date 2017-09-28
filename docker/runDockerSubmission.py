@@ -152,10 +152,10 @@ def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, 
         with open(logFileName,'w') as logFile:
             logFile.write(logFileText)
         statinfo = os.stat(logFileName)
-        #Only store log file if > 0bytes
-        if statinfo.st_size > 0 and statinfo.st_size/1000.0 <= 50:
-            ent = File(logFileName, parent = logFolderId)
-            logSynId = attemptStoreLog(syn, ent)
+        # #Only store log file if > 0bytes
+        # if statinfo.st_size > 0 and statinfo.st_size/1000.0 <= 50:
+        #     ent = File(logFileName, parent = logFolderId)
+        #     logSynId = attemptStoreLog(syn, ent)
 
         #Remove container and image after being done
         container.remove()
@@ -170,10 +170,14 @@ def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, 
             if errors is not None:
                 logFile.write(errors)
             else:
-                logFile.write("No Logs, or logs exceed size limit")
-            logFile.flush()
-            ent = File(logFileName, parent = logFolderId)
-            logSynId = attemptStoreLog(syn, ent)
+                logFile.write("No Logs, or logs exceed size limit of 50kb")
+        ent = File(logFileName, parent = logFolderId)
+        logSynId = attemptStoreLog(syn, ent)
+    elif statinfo.st_size /1000.0 > 50:
+        with open(logFileName,'w') as logFile:
+            logFile.write("Logs exceed size limit of 50kb")
+    ent = File(logFileName, parent = logFolderId)
+    logSynId = attemptStoreLog(syn, ent) 
 
     # if logSynId is None:
     #     logFile = synu.walk(syn, logFolderId)
