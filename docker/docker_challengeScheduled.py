@@ -317,7 +317,7 @@ def validate(evaluation, syn, client, canCancel, user, password, dry_run=False):
         
 def checkLock(threads):
     dirs = os.listdir("./")
-    if sum([folder.endswith(".lock") for folder in dirs if folder not in ['scoring.lock','challenge.lock']]) == threads:
+    if sum([folder.endswith(".lock") for folder in dirs if folder not in ['scoring.lock','challenge.lock']]) >= threads:
         time.sleep(60)
         checkLock(threads)
     else:
