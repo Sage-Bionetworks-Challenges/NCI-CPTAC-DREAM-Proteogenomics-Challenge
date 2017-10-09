@@ -316,7 +316,7 @@ def validate(evaluation, syn, client, canCancel, user, password, dry_run=False):
                 message=validation_message)
         
 def checkLock(threads):
-    dirs = os.listdir("./")
+    dirs = os.listdir(SCRIPT_DIR)
     if sum([folder.endswith(".lock") for folder in dirs if folder not in ['scoring.lock','challenge.lock']]) == threads:
         time.sleep(60)
         checkLock(threads)
