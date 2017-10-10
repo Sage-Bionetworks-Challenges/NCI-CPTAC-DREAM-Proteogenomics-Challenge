@@ -68,6 +68,7 @@ correlation_by_row <- function(pred_path, truth_path) {
     {
     temp <- cor.test(mat1[ i, ], mat2[ i , ])
     pcorr <- temp$estimate # pearson correlation
+    if (is.na(pcorr)) {pcorr<-0}
     corr_vec <- c(corr_vec , pcorr)
     }
   }
@@ -121,6 +122,7 @@ correlation_by_row_ALL_OBSERVED <- function(pred_path, truth_path) {
     {
     temp <- cor.test(mat1[ i, ], mat2[ i , ])
     pcorr <- temp$estimate # pearson correlation
+    if (is.na(pcorr)) {pcorr<-0}
     corr_vec <- c(corr_vec , pcorr)
     }
   }
@@ -173,6 +175,7 @@ correlation_by_row_less30percMissing <- function(pred_path, truth_path) {
     {
     temp <- cor.test(mat1[ i, ], mat2[ i , ])
     pcorr <- temp$estimate # pearson correlation
+    if (is.na(pcorr)) {pcorr<-0}
     corr_vec <- c(corr_vec , pcorr)
     }
   }
