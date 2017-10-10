@@ -62,9 +62,14 @@ correlation_by_row <- function(pred_path, truth_path) {
   
   corr_vec <- c()
   for(i in 1:length(mat1[ ,1]) ) {
+    
+  c <- rbind(mat1[i, ], mat2[i, ]) ; c <- c[ ,complete.cases(c)]
+  if(length(which(apply(c, 1, var) == 0)) > 0) { corr_vec <- c(corr_vec , 0 ) } else 
+    {
     temp <- cor.test(mat1[ i, ], mat2[ i , ])
     pcorr <- temp$estimate # pearson correlation
     corr_vec <- c(corr_vec , pcorr)
+    }
   }
   names(corr_vec) <- rownames(mat1)
   return(mean(corr_vec))
@@ -111,9 +116,13 @@ correlation_by_row_ALL_OBSERVED <- function(pred_path, truth_path) {
   
   corr_vec <- c()
   for(i in 1:length(mat1[ ,1]) ) {
+  c <- rbind(mat1[i, ], mat2[i, ]) ; c <- c[ ,complete.cases(c)]
+  if(length(which(apply(c, 1, var) == 0)) > 0) { corr_vec <- c(corr_vec , 0 ) } else 
+    {
     temp <- cor.test(mat1[ i, ], mat2[ i , ])
     pcorr <- temp$estimate # pearson correlation
     corr_vec <- c(corr_vec , pcorr)
+    }
   }
   names(corr_vec) <- rownames(mat1)
   return(mean(corr_vec))
@@ -158,10 +167,14 @@ correlation_by_row_less30percMissing <- function(pred_path, truth_path) {
   mat1 <- mat1[rownames(mat2), ]
   
   corr_vec <- c()
-  for(i in 1:length(mat1[ ,1]) ) {
+  for(i in 1:length(mat1[ ,1]) ) { 
+  c <- rbind(mat1[i, ], mat2[i, ]) ; c <- c[ ,complete.cases(c)]
+  if(length(which(apply(c, 1, var) == 0)) > 0) { corr_vec <- c(corr_vec , 0 ) } else 
+    {
     temp <- cor.test(mat1[ i, ], mat2[ i , ])
     pcorr <- temp$estimate # pearson correlation
     corr_vec <- c(corr_vec , pcorr)
+    }
   }
   names(corr_vec) <- rownames(mat1)
   return(mean(corr_vec))
