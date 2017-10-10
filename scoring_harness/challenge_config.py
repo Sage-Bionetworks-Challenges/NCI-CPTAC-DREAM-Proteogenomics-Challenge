@@ -58,6 +58,7 @@ def _validate_func_helper(filePath, goldDf, predOrConf, column="proteinID", vari
     assert os.stat(filePath).st_size > 0, "%s: Can't be an empty file" % fileName
     try :
         fileDf = pd.read_csv(filePath, sep="\t",header=None)
+        assert fileDf[0][0] == column, "Please do not write out the row names in your prediction file."
     except pd.errors.ParserError as e:
         raise AssertionError("Please do not write out the row names in your prediction file.")
 
