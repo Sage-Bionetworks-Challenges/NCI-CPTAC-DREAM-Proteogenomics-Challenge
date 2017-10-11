@@ -22,6 +22,7 @@ score.cor = function(pred_path, observed_path, truth_path)
   d.predict[!missing.ind]= NA;
   d.predict[d.true==0]= NA;
   cor.p = sapply(1:L,function(l){cor(d.predict[l,],d.true[l,],use = 'pairwise.complete.obs')});
+  cor.p[is.na(cor.p)]=0;
   return(mean(cor.p));
 }
 #get.score.sc1 isn't used in the scoring harness
