@@ -323,7 +323,7 @@ def checkLock(threads):
     else:
         pass
 
-def score(evaluation, syn, client, canCancel, threads, userName, password, dry_run=False):
+def score(evaluation, syn, client, canCancel, threads, userName, password, timeQuota, dry_run=False):
 
     if type(evaluation) != Evaluation:
         evaluation = syn.getEvaluation(evaluation)
@@ -343,6 +343,7 @@ def score(evaluation, syn, client, canCancel, threads, userName, password, dry_r
             status = update_single_submission_status(status, add_annotations, force=True)
             status = syn.store(status)
             command = ['python',os.path.join(SCRIPT_DIR,'runDockerSubmission.py'),sub.id,
+                       '--timeQuota',str(timeQuota),
                        '--challengePredFolder','syn8729051',
                        '--challengeLogFolder','syn9771357',
                        '--configFile',os.path.join(SCRIPT_DIR,"config.json"),
@@ -577,9 +578,9 @@ def command_validate(args):
 def command_score(args):
     if args.all:
         for queue_info in conf.config_evaluations:
-            score(queue_info['id'], args.syn, args.client, args.canCancel, args.threads, args.user, args.password, dry_run=args.dry_run)
+            score(queue_info['id'], args.syn, args.client, args.canCancel, args.threads, args.user, args.password, timeQuota=args.timeQuota, dry_run=args.dry_run)
     elif args.evaluation:
-        score(args.evaluation, args.syn, args.client, args.canCancel, args.threads, args.user, args.password, dry_run=args.dry_run)
+        score(args.evaluation, args.syn, args.client, args.canCancel, args.threads, args.user, args.password, timeQuota=args.timeQuota, dry_run=args.dry_run)
     else:
         sys.stderr.write("\Score command requires either an evaluation ID or --all to score all queues in the challenge")
 
@@ -628,6 +629,7 @@ def main():
     parser.add_argument("--debug", help="Show verbose error output from Synapse API calls", action="store_true", default=False)
     parser.add_argument("--canCancel", action="store_true", default=False)
     parser.add_argument("--threads", type=int, default=1)
+    parser.add_argument("--timeQuota", help="Time quota in milliseconds", type=int, default=None)
 
     subparsers = parser.add_subparsers(title="subcommand")
 

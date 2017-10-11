@@ -107,7 +107,7 @@ def attemptStoreLog(syn, entity):
         logSynId = None
     return(logSynId)
 
-def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, challenge_log_folder, volumes, output_dir):
+def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, challenge_log_folder, volumes, output_dir, timeQuota=None):
     logFolderId = findFolder(syn, challenge_log_folder, submission.id)
     # allLogs = synu.walk(syn, challenge_log_folder)
     # logFolder = allLogs.next()
@@ -128,6 +128,8 @@ def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, 
 
     # Run docker image (Can attach container name if necessary)
     errors = None
+    start_run = int(time.time()*1000)
+    exceedTimeQuota = False
     try:
         container = client.containers.run(dockerImage, scoring_sh, detach=True,volumes = volumes, name=submission.id + "_t" + str(int(time.time())), network_disabled=True)
     except docker.errors.APIError as e:
@@ -152,6 +154,11 @@ def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, 
                 ent = File(logFileName, parent = logFolderId)
                 logSynId = attemptStoreLog(syn, ent)
             time.sleep(60)
+            runNow = int(time.time()*1000)
+            if timeQuota is not None:
+                if (runNow - start_run) > timeQuota:
+                    container.stop()
+                    exceedTimeQuota = True
 
         #Must run again to make sure all the logs are captured
         logFileText = container.logs()
@@ -182,8 +189,14 @@ def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, 
     elif statinfo.st_size /1000.0 > 50:
         with open(logFileName,'w') as logFile:
             logFile.write("Logs exceed size limit of 50kb")
+    outdirs = os.listdir(output_dir)
+    if exceedTimeQuota:
+        with open(logFileName,'a') as logFile:
+            logFile.write("\n Docker Container killed due to exceeding the timeQuota of %s hours." % str(timeQuota / (1000*60*60.0)))
+        os.system("rm -rf %s/*" % output_dir)
     ent = File(logFileName, parent = logFolderId)
     logSynId = attemptStoreLog(syn, ent) 
+
 
     # if logSynId is None:
     #     logFile = synu.walk(syn, logFolderId)
@@ -194,13 +207,14 @@ def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, 
     #         logSynId = logs.id
     #     else:
     #         logSynId = logFiles[2][0][1]
-
+        
     #Zip up predictions and store it into CHALLENGE_PREDICTIONS_FOLDER
+
     if len(os.listdir(output_dir)) > 0:
+        exceedTimeQuota = False
         zipf = zipfile.ZipFile(submission.id + '_predictions.zip', 'w', zipfile.ZIP_DEFLATED)
         zipdir(output_dir, zipf)
         zipf.close()
-
         ent = File(submission.id + '_predictions.zip', parent = predFolderId)
         predictions = syn.store(ent)
         prediction_synId = predictions.id
@@ -210,13 +224,12 @@ def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, 
     #Remove log file and prediction file
     os.remove(logFileName)
     os.system("rm -rf %s" % output_dir)
-
     if prediction_synId is not None:
         message = "Your prediction file has been stored, but you will not have access to it."
     else:
         message = "No prediction file generated, please check your log file: https://www.synapse.org/#!Synapse:%s" % logSynId
 
-    return({"PREDICTION_FILE":prediction_synId, "LOG_FILE":logSynId}, message)
+    return({"PREDICTION_FILE":prediction_synId, "LOG_FILE":logSynId}, message, exceedTimeQuota)
 
 #Get team/individual name
 def getTeam(syn, submission):
@@ -232,7 +245,7 @@ def getTeam(syn, submission):
     else:
         return('?')
 
-def run(syn, client, submissionId, configFile, challenge_prediction_folder, challenge_log_folder, output_dir, mountedVolumes, canCancel, dry_run=False):
+def run(syn, client, submissionId, configFile, challenge_prediction_folder, challenge_log_folder, output_dir, mountedVolumes, canCancel, timeQuota=None, dry_run=False):
     submission = syn.getSubmission(submissionId)
     status = syn.getSubmissionStatus(submissionId)
     evaluation = syn.getEvaluation(submission.evaluationId)
@@ -261,12 +274,14 @@ def run(syn, client, submissionId, configFile, challenge_prediction_folder, chal
     #If submission_info is None, then the code passed
     submission_info = None
     try:
-        score, message = dockerRun(syn, client, submission, score_sh, challenge_prediction_folder, challenge_log_folder, volumes, output_dir)
+        score, message, exceedTimeQuota = dockerRun(syn, client, submission, score_sh, challenge_prediction_folder, challenge_log_folder, volumes, output_dir, timeQuota)
 
         logFile.write("scored: %s %s %s %s" % (submission.id, submission.name, submission.userId, str(score)))
         logFile.flush()
         score['team'] = getTeam(syn, submission)
         score['RUN_END'] = int(time.time()*1000)
+        if exceedTimeQuota:
+            score['FAILURE_REASON'] = "Exceeded Time Quota of %s hours" % str(timeQuota / (1000*60*60.0))
 
         add_annotations = synapseclient.annotations.to_submission_status_annotations(score,is_private=False)
         status = update_single_submission_status(status, add_annotations, force=True)
@@ -310,7 +325,7 @@ def run(syn, client, submissionId, configFile, challenge_prediction_folder, chal
             submission_id=submission.id)
 
 def command_run(args):
-    run(args.syn, args.client, args.submissionId, args.configFile, args.challengePredFolder, args.challengeLogFolder, args.outputDir, args.mountedVolumes, args.canCancel, dry_run=args.dry_run)
+    run(args.syn, args.client, args.submissionId, args.configFile, args.challengePredFolder, args.challengeLogFolder, args.outputDir, args.mountedVolumes, args.canCancel, timeQuota=args.timeQuota, dry_run=args.dry_run)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -321,6 +336,7 @@ def main():
     parser.add_argument("--outputDir", required=True)
     parser.add_argument("--mountedVolumes", nargs="*", required=True)
     parser.add_argument("--configFile", required=True)
+    parser.add_argument("--timeQuota", help="Time quota in milliseconds", type=int, default=None)
     #Has default values
     parser.add_argument("-u", "--user", help="UserName", default=None)
     parser.add_argument("-p", "--password", help="Password", default=None)
