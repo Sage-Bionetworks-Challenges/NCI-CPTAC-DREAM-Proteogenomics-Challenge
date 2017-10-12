@@ -28,10 +28,6 @@ score.cor = function(pred_path, observed_path, truth_path)
 #get.score.sc1 isn't used in the scoring harness
 get.score.sc1 = function(path_pred='/',path_obs='/',path_true='/')
 {
-  #pred_file_all = sort(paste0(path_pred,dir(path_pred)));
-  # observed_file_all = sort(paste0(path,"data_test_obs_",1:100,'.txt'));
-  #observed_file_all = sort(paste0(path_obs,dir(path_obs)));
-  truth_file = paste0(path_true,'data_test_true.txt');
   nrmsd.all=c()
   cor.all=c()
   
@@ -39,8 +35,7 @@ get.score.sc1 = function(path_pred='/',path_obs='/',path_true='/')
   {
     pred_file = paste0(path_pred,sprintf('predictions_%s.tsv', i));
     observed_file = paste0(path_obs,sprintf('data_test_obs_%s.txt', i));
-    #pred_file=pred_file_all[i];
-    #observed_file = observed_file_all[i];
+    truth_file = paste0(path_obs,sprintf('data_test_true_%s.txt', i));
     nrmsd.all = c(nrmsd.all,score.nrmsd(pred_file, observed_file, truth_file));  
     cor.all = c(cor.all,score.cor(pred_file, observed_file, truth_file));  
   }  
