@@ -4,7 +4,9 @@ score.nrmsd = function(pred_path, observed_path, truth_path)
 {
   d.predict = as.matrix(read.csv( pred_path, sep="\t", row.names=1));
   d.true = as.matrix(read.csv( truth_path, sep="\t", row.names=1));
-  missing.ind = is.na(as.matrix(read.csv( observed_path, sep="\t", row.names=1)));
+  d.obs = as.matrix(read.csv( observed_path, sep="\t",row.names = 1));
+  d.obs[d.obs==''] = NA; 
+  missing.ind = is.na(d.obs);
   
   diff.true = apply(d.true, 1, function(x){diff(range(x[x>0]))});
   d.predict[!missing.ind]= NA;
@@ -16,8 +18,10 @@ score.cor = function(pred_path, observed_path, truth_path)
 {
   d.predict = as.matrix(read.csv( pred_path, sep="\t", row.names=1));
   d.true = as.matrix(read.csv( truth_path, sep="\t", row.names=1));
-  missing.ind = is.na(as.matrix(read.csv( observed_path, sep="\t", row.names=1)));
-  
+  d.obs = as.matrix(read.csv( observed_path, sep="\t",row.names = 1));
+  d.obs[d.obs==''] = NA; 
+  missing.ind = is.na(d.obs);
+    
   L = dim(d.true)[1]
   d.predict[!missing.ind]= NA;
   d.predict[d.true==0]= NA;
