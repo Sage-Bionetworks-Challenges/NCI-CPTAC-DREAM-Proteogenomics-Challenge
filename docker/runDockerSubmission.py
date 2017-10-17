@@ -131,7 +131,7 @@ def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, 
     start_run = int(time.time()*1000)
     exceedTimeQuota = False
     try:
-        container = client.containers.run(dockerImage, scoring_sh, detach=True,volumes = volumes, name=submission.id + "_t" + str(int(time.time())), network_disabled=True)
+        container = client.containers.run(dockerImage, scoring_sh, detach=True,volumes = volumes, name=submission.id + "_t" + str(int(time.time())), network_disabled=True, mem_limit="20g")
     except docker.errors.APIError as e:
         container = None
         errors = str(e) + "\n"
