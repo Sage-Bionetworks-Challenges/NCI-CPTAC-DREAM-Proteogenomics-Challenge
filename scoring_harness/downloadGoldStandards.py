@@ -23,12 +23,8 @@ def main():
 		os.mkdir(expressDir)
 	if not os.path.exists(internalDir):
 		os.mkdir(internalDir)
-	#sc1 test, round1,2
-	downloadData(syn, "syn10807805",downloadDir)
-	downloadData(syn, "syn10807065",downloadDir)
-	#sc2_test = syn.get("syn10514976")
-	#sc3_test = syn.get("syn10666694")
-	#Internal use final round
+
+	#INTNERNAL QUEUES
 	downloadData(syn, "syn10807814",internalDir)
 	for i in range(1,101):
 		truth_file = i+100
@@ -37,13 +33,19 @@ def main():
 	for i in range(1,101):
 		truth_file = i+100
 		os.rename(os.path.join(internalDir, "data_test_true_%s.txt" % truth_file), os.path.join(internalDir, "data_test_true_%s.txt" % i))
-
 	sc2_test = syn.get("syn10763225")
 	sc3_test = syn.get("syn10763252")
+
 	if args.round == '1':
+		#sc1 test, round1,2
+		downloadData(syn, "syn10807805",downloadDir)
+		downloadData(syn, "syn10807065",downloadDir)
 		sc2 = syn.get("syn10763208")
 		sc3 = syn.get("syn10763237")
 	elif args.round == '2':
+		#sc1 test, round1,2
+		downloadData(syn, "syn10807805",downloadDir)
+		downloadData(syn, "syn10807065",downloadDir)
 		sc2 = syn.get("syn10763217")
 		sc3 = syn.get("syn10763243")
 	else:
