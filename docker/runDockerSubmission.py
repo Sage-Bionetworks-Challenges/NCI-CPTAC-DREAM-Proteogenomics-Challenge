@@ -336,7 +336,7 @@ def main():
     parser.add_argument("--outputDir", required=True)
     parser.add_argument("--mountedVolumes", nargs="*", required=True)
     parser.add_argument("--configFile", required=True)
-    parser.add_argument("--timeQuota", help="Time quota in milliseconds", type=int, default=None)
+    parser.add_argument("--timeQuota", help="Time quota in milliseconds", type=int)
     #Has default values
     parser.add_argument("-u", "--user", help="UserName", default=None)
     parser.add_argument("-p", "--password", help="Password", default=None)

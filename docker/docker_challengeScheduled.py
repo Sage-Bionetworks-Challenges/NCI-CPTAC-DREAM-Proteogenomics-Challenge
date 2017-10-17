@@ -629,7 +629,7 @@ def main():
     parser.add_argument("--debug", help="Show verbose error output from Synapse API calls", action="store_true", default=False)
     parser.add_argument("--canCancel", action="store_true", default=False)
     parser.add_argument("--threads", type=int, default=1)
-    parser.add_argument("--timeQuota", help="Time quota in milliseconds", type=int, default=None)
+    parser.add_argument("--timeQuota", help="Time quota in milliseconds", type=int)
 
     subparsers = parser.add_subparsers(title="subcommand")
 
