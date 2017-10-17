@@ -16,16 +16,21 @@ def main():
 	syn = synapseclient.login()
 	downloadDir = os.path.join(os.path.dirname(os.path.abspath(__file__)),"goldstandard")
 	expressDir = os.path.join(downloadDir,"express")
+	internalDir = os.path.join(downloadDir,"internal")
 	if not os.path.exists(downloadDir):
 		os.mkdir(downloadDir)
 	if not os.path.exists(expressDir):
 		os.mkdir(expressDir)
+	if not os.path.exists(internalDir):
+		os.mkdir(internalDir)
 	#sc1 test, round1,2
 	downloadData(syn, "syn10807805",downloadDir)
 	downloadData(syn, "syn10807065",downloadDir)
 	#sc2_test = syn.get("syn10514976")
 	#sc3_test = syn.get("syn10666694")
 	#Internal use final round
+	downloadData(syn, "syn10807814",internalDir)
+	downloadData(syn, "syn10617827",internalDir)
 	sc2_test = syn.get("syn10763225")
 	sc3_test = syn.get("syn10763252")
 	if args.round == '1':

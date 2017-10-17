@@ -191,7 +191,7 @@ evaluation_queues = [
         'scoring_func':score1,
         'validation_func':validate_func1,
         'column':'proteinID',
-        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard')
+        'goldstandard_path':os.path.join(os.path.dirname(os.path.abspath(__file__)),'goldstandard/internal')
 
     },
     {
