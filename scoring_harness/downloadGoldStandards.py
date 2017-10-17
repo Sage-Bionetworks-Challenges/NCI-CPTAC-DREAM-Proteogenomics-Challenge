@@ -30,7 +30,14 @@ def main():
 	#sc3_test = syn.get("syn10666694")
 	#Internal use final round
 	downloadData(syn, "syn10807814",internalDir)
-	downloadData(syn, "syn10617827",internalDir)
+	for i in range(1,101):
+		truth_file = i+100
+		os.rename(os.path.join(internalDir, "data_test_obs_%s.txt" % truth_file), os.path.join(internalDir, "data_test_obs_%s.txt" % i))
+	downloadData(syn, "syn10807068",internalDir)
+	for i in range(1,101):
+		truth_file = i+100
+		os.rename(os.path.join(internalDir, "data_test_true_%s.txt" % truth_file), os.path.join(internalDir, "data_test_true_%s.txt" % i))
+
 	sc2_test = syn.get("syn10763225")
 	sc3_test = syn.get("syn10763252")
 	if args.round == '1':
