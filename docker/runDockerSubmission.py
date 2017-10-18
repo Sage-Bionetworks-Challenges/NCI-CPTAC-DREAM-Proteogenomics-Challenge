@@ -183,12 +183,12 @@ def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, 
             if errors is not None:
                 logFile.write(errors)
             else:
-                logFile.write("No Logs, or logs exceed size limit of 50kb")
+                logFile.write("No Logs")
         ent = File(logFileName, parent = logFolderId)
         logSynId = attemptStoreLog(syn, ent)
     elif statinfo.st_size /1000.0 > 50:
         with open(logFileName,'w') as logFile:
-            logFile.write("Logs exceed size limit of 50kb")
+            logFile.write(subprocess.check_output(["tail",logFileName]) + "\n\nLogs truncated because it exceeded size limit of 50kb")
     outdirs = os.listdir(output_dir)
     if exceedTimeQuota:
         with open(logFileName,'a') as logFile:
