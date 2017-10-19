@@ -157,7 +157,8 @@ def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, 
             runNow = int(time.time()*1000)
             if timeQuota is not None:
                 if (runNow - start_run) > timeQuota:
-                    container.stop()
+                    #container.stop()
+                    subprocess.call(['docker','stop',container.name])
                     exceedTimeQuota = True
 
         #Must run again to make sure all the logs are captured
