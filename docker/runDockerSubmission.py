@@ -128,13 +128,13 @@ def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, 
 
     # Run docker image (Can attach container name if necessary)
     errors = None
-    start_run = int(time.time()*1000)
     exceedTimeQuota = False
     try:
         container = client.containers.run(dockerImage, scoring_sh, detach=True,volumes = volumes, name=submission.id + "_t" + str(int(time.time())), network_disabled=True, mem_limit="20g")
     except docker.errors.APIError as e:
         container = None
         errors = str(e) + "\n"
+    start_run = int(time.time()*1000)
 
     logFileName = submission.id + "_log.txt"
     logSynId = None
