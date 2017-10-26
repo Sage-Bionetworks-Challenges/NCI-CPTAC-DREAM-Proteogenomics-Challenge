@@ -157,7 +157,8 @@ def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, 
             runNow = int(time.time()*1000)
             if timeQuota is not None:
                 if (runNow - start_run) > timeQuota:
-                    container.stop()
+                    #container.stop()
+                    subprocess.call(['docker','stop',container.name])
                     exceedTimeQuota = True
 
         #Must run again to make sure all the logs are captured
@@ -187,8 +188,9 @@ def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, 
         ent = File(logFileName, parent = logFolderId)
         logSynId = attemptStoreLog(syn, ent)
     elif statinfo.st_size /1000.0 > 50:
+        oldLogs = subprocess.check_output(["tail",logFileName])
         with open(logFileName,'w') as logFile:
-            logFile.write(subprocess.check_output(["tail",logFileName]) + "\n\nLogs truncated because it exceeded size limit of 50kb")
+            logFile.write(oldLogs + "\n\nLogs truncated because it exceeded size limit of 50kb")
     outdirs = os.listdir(output_dir)
     if exceedTimeQuota:
         with open(logFileName,'a') as logFile:
