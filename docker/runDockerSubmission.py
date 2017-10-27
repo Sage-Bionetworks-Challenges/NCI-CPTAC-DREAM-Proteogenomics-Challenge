@@ -274,7 +274,7 @@ def run(syn, client, submissionId, configFile, challenge_prediction_folder, chal
     
     with open(configFile, 'r') as config:
         config_evaluations = json.load(config)['config_evaluations']
-    score_sh = [ev['score_sh'] for ev in config_evaluations if ev['id'] == int(evaluation.id)][0]
+    score_sh = [ev['score_sh'] for ev in config_evaluations if ev['id'] == int(evaluation.id)]
     returnLog = bool([ev['returnLog'] for ev in config_evaluations if ev['id'] == int(evaluation.id)][0])
     #If submission_info is None, then the code passed
     submission_info = None
