@@ -348,6 +348,7 @@ def score(evaluation, syn, client, canCancel, threads, userName, password, timeQ
                        '--challengeLogFolder','syn9771357',
                        '--configFile',os.path.join(SCRIPT_DIR,"config.json"),
                        '--mountedVolumes',os.path.join(SCRIPT_DIR,"evaluation_data") + ":/evaluation_data:ro",
+                       '--returnLogs',
                        '-u', userName, '-p', password,
                        '--outputDir',os.path.join(SCRIPT_DIR,sub.id),
                        '--send-messages','--notifications']

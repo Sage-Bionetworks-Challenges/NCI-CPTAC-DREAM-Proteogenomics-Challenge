@@ -107,7 +107,7 @@ def attemptStoreLog(syn, entity):
         logSynId = None
     return(logSynId)
 
-def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, challenge_log_folder, volumes, output_dir, timeQuota=None):
+def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, challenge_log_folder, volumes, output_dir, timeQuota=None, returnLog=True):
     logFolderId = findFolder(syn, challenge_log_folder, submission.id)
     # allLogs = synu.walk(syn, challenge_log_folder)
     # logFolder = allLogs.next()
@@ -229,7 +229,10 @@ def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, 
     if prediction_synId is not None:
         message = "Your prediction file has been stored, but you will not have access to it."
     else:
-        message = "No prediction file generated, please check your log file: https://www.synapse.org/#!Synapse:%s" % logSynId
+        if returnLog:
+            message = "No prediction file generated, please check your log file: https://www.synapse.org/#!Synapse:%s" % logSynId
+        else:
+            message = "No prediction file generated, please submit to the express lanes to debug your model!"
 
     return({"PREDICTION_FILE":prediction_synId, "LOG_FILE":logSynId}, message, exceedTimeQuota)
 
@@ -271,12 +274,12 @@ def run(syn, client, submissionId, configFile, challenge_prediction_folder, chal
     
     with open(configFile, 'r') as config:
         config_evaluations = json.load(config)['config_evaluations']
-    score_sh = [ev['score_sh'] for ev in config_evaluations if ev['id'] == int(evaluation.id)]
-
+    score_sh = [ev['score_sh'] for ev in config_evaluations if ev['id'] == int(evaluation.id)][0]
+    returnLog = bool([ev['returnLog'] for ev in config_evaluations if ev['id'] == int(evaluation.id)][0])
     #If submission_info is None, then the code passed
     submission_info = None
     try:
-        score, message, exceedTimeQuota = dockerRun(syn, client, submission, score_sh, challenge_prediction_folder, challenge_log_folder, volumes, output_dir, timeQuota)
+        score, message, exceedTimeQuota = dockerRun(syn, client, submission, score_sh, challenge_prediction_folder, challenge_log_folder, volumes, output_dir, timeQuota, returnLog)
 
         logFile.write("scored: %s %s %s %s" % (submission.id, submission.name, submission.userId, str(score)))
         logFile.flush()

@@ -2,39 +2,48 @@
     "config_evaluations": [
         {
             "id":8720143,
-            "score_sh":"/score_sc1.sh"
+            "score_sh":"/score_sc1.sh",
+            "returnLog":"False"
         },
         {
             "id":8720145,
-            "score_sh":"/score_sc2.sh"
+            "score_sh":"/score_sc2.sh",
+            "returnLog":"False"
         },
         {
             "id":8720149,
-            "score_sh":"/score_sc3.sh"
+            "score_sh":"/score_sc3.sh",
+            "returnLog":"False"
         },
         {
             "id":9604716,
-            "score_sh":"/score_sc1.sh"
+            "score_sh":"/score_sc1.sh",
+            "returnLog":"True"
         },
         {
             "id":9604717,
-            "score_sh":"/score_sc2.sh"
+            "score_sh":"/score_sc2.sh",
+            "returnLog":"True"
         },
         {
             "id":9604718,
-            "score_sh":"/score_sc3.sh"
+            "score_sh":"/score_sc3.sh",
+            "returnLog":"True"
         },
         {
             "id":9606530,
-            "score_sh":"/score_sc1.sh"
+            "score_sh":"/score_sc1.sh",
+            "returnLog":"True"
         },
         {
             "id":9606531,
-            "score_sh":"/score_sc2.sh"
+            "score_sh":"/score_sc2.sh",
+            "returnLog":"True"
         },
         {
             "id":9606532,
-            "score_sh":"/score_sc3.sh"
+            "score_sh":"/score_sc3.sh",
+            "returnLog":"True"
         }
     ]
 }
