@@ -229,7 +229,7 @@ def dockerRun(syn, client, submission, scoring_sh, challenge_prediction_folder, 
     if prediction_synId is not None:
         message = "Your prediction file has been stored, but you will not have access to it."
     else:
-        if returnLog:
+        if returnLog == "True":
             message = "No prediction file generated, please check your log file: https://www.synapse.org/#!Synapse:%s" % logSynId
         else:
             message = "No prediction file generated, please submit to the express lanes to debug your model!"
@@ -275,7 +275,7 @@ def run(syn, client, submissionId, configFile, challenge_prediction_folder, chal
     with open(configFile, 'r') as config:
         config_evaluations = json.load(config)['config_evaluations']
     score_sh = [ev['score_sh'] for ev in config_evaluations if ev['id'] == int(evaluation.id)]
-    returnLog = bool([ev['returnLog'] for ev in config_evaluations if ev['id'] == int(evaluation.id)][0])
+    returnLog = [ev['returnLog'] for ev in config_evaluations if ev['id'] == int(evaluation.id)][0]
     #If submission_info is None, then the code passed
     submission_info = None
     try:
