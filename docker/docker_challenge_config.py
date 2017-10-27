@@ -30,15 +30,18 @@ config_evaluations = [
 
     {
         'id':8720143,
-        'score_sh':'/score_sc1.sh'
+        'score_sh':'/score_sc1.sh',
+        'returnLog':False
     },
     {
         'id':8720145,
-        'score_sh':'/score_sc2.sh'
+        'score_sh':'/score_sc2.sh',
+        'returnLog':False
     },
     {
         'id':8720149,
-        'score_sh':'/score_sc3.sh'
+        'score_sh':'/score_sc3.sh',
+        'returnLog':False
     },
 #Proteogenomics Subchallenge 1 Express (9604716)
 #Proteogenomics Subchallenge 2 Express (9604717)
@@ -46,15 +49,18 @@ config_evaluations = [
 
     {
         'id':9604716,
-        'score_sh':'/score_sc1.sh'
+        'score_sh':'/score_sc1.sh',
+        'returnLog':True
     },
     {
         'id':9604717,
-        'score_sh':'/score_sc2.sh'
+        'score_sh':'/score_sc2.sh',
+        'returnLog':True
     },
     {
         'id':9604718,
-        'score_sh':'/score_sc3.sh'
+        'score_sh':'/score_sc3.sh',
+        'returnLog':True
     },
 #Proteogenomics Subchallenge 1 Internal (9606530)
 #Proteogenomics Subchallenge 2 Internal (9606531)
@@ -62,15 +68,18 @@ config_evaluations = [
 
     {
         'id':9606530,
-        'score_sh':'/score_sc1.sh'
+        'score_sh':'/score_sc1.sh',
+        'returnLog':True
     },
     {
         'id':9606531,
-        'score_sh':'/score_sc2.sh'
+        'score_sh':'/score_sc2.sh',
+        'returnLog':True
     },
     {
         'id':9606532,
-        'score_sh':'/score_sc3.sh'
+        'score_sh':'/score_sc3.sh',
+        'returnLog':True
     }
 
 ]
@@ -104,7 +113,7 @@ def zipdir(path, ziph):
             ziph.write(os.path.join(root, file),os.path.join(root, file).replace(path+"/",""))
 
 
-def dockerValidate(submission, syn, user, password):
+def dockerValidate(submission, syn, user, password, returnLog):
     submissionJson = json.loads(submission['entityBundleJSON'])
     assert submissionJson['entity'].get('repositoryName') is not None, "Must submit a docker container"
     dockerRepo = submissionJson['entity']['repositoryName'].replace("docker.synapse.org/","")
@@ -145,18 +154,24 @@ def dockerValidate(submission, syn, user, password):
     if len(logsSynId) == 0:
         logFolder = syn.store(Folder(submission.id, parent = CHALLENGE_LOG_FOLDER))
         logFolder = logFolder.id
-        for participant in submission.contributors:
-            if participant['principalId'] in ADMIN_USER_IDS: 
-                access = ['CREATE', 'READ', 'DOWNLOAD', 'UPDATE', 'DELETE', 'CHANGE_PERMISSIONS', 'MODERATE', 'CHANGE_SETTINGS']
-            else:
-                access = ['READ','DOWNLOAD']
-            #Comment set permissions out if you don't want to allow participants to see the pred files
-            #syn.setPermissions(predFolder, principalId = participant['principalId'], accessType = access)
-            syn.setPermissions(logFolder, principalId = participant['principalId'], accessType = access)
+        if returnLog:
+            for participant in submission.contributors:
+                if participant['principalId'] in ADMIN_USER_IDS: 
+                    access = ['CREATE', 'READ', 'DOWNLOAD', 'UPDATE', 'DELETE', 'CHANGE_PERMISSIONS', 'MODERATE', 'CHANGE_SETTINGS']
+                else:
+                    access = ['READ','DOWNLOAD']
+                #Comment set permissions out if you don't want to allow participants to see the pred files
+                #syn.setPermissions(predFolder, principalId = participant['principalId'], accessType = access)
+                syn.setPermissions(logFolder, principalId = participant['principalId'], accessType = access)
     else:
-        logFolder = logsSynId[0]      
+        logFolder = logsSynId[0] 
 
-    return(True, "Your submission has been validated!  As your submission is being ran, please go here: https://www.synapse.org/#!Synapse:%s to check on your log file." % logFolder)
+    if returnLog:
+        messageReturned = "Your submission has been validated!  As your submission is being ran, please go here: https://www.synapse.org/#!Synapse:%s to check on your log file." % logFolder   
+    else:
+        messageReturned = "Your submission has been validated! Your log files will not be returned, please submit to express lanes to test your model!"
+
+    return(True, messageReturned)
 
 
 def dockerRun(submission, scoring_sh, syn, client):
@@ -286,7 +301,7 @@ def validate_docker(evaluation, submission, syn, client, user, password):
     """
     config = config_evaluations_map[int(evaluation.id)]
 
-    results = dockerValidate(submission, syn, user, password)
+    results = dockerValidate(submission, syn, user, password, config['returnLog'])
     return(results)
 
 def run_docker(evaluation, submission, syn, client):
@@ -304,6 +319,10 @@ def run_docker(evaluation, submission, syn, client):
         #message = "You can find your prediction file here: https://www.synapse.org/#!Synapse:%s" % prediction_synId
         message = "Your prediction file has been stored, but you will not have access to it."
     else:
-        message = "No prediction file generated, please check your log file: https://www.synapse.org/#!Synapse:%s" % log_synId
+        if config['returnLog']:
+            message = "No prediction file generated, please check your log file: https://www.synapse.org/#!Synapse:%s" % log_synId
+        else:
+            message = "No prediction file generated, please submit to the express lanes to debug your model!"
+
     return (dict(PREDICTION_FILE=prediction_synId, LOG_FILE = log_synId), message)
 
