@@ -204,11 +204,11 @@ NRMSE_by_row_less30percMissing <- function(pred_path, truth_path)  {
 
 ## FINAL ROUND 
 
-correlation_by_row_FINAL_ROUND <- function(pred_path, truth_path) {
+correlation_by_row_FINAL_ROUND <- function(pred_path, truth_path, phosphosites_path) {
   prediction <- read.csv( pred_path, row.names = 1 , check.names = F, sep="\t") 
   test_prot  <- read.csv( truth_path, row.names = 1 , check.names = F, sep="\t")
  
-  common_protein <- intersect(rownames(prediction), rownames(test_prot))
+  common_protein <- rownames(read.csv(phosphosites_path, row.names = 1 , check.names = F, sep="\t"))
   prediction <- prediction[common_protein, colnames(test_prot)]
   test_prot <- test_prot[common_protein, colnames(test_prot)]
   
@@ -227,12 +227,12 @@ correlation_by_row_FINAL_ROUND <- function(pred_path, truth_path) {
   return(mean(corr_vec))
 }
 
-NRMSE_by_row_FINAL_ROUND <- function(pred_path, truth_path)  {
+NRMSE_by_row_FINAL_ROUND <- function(pred_path, truth_path, phosphosites_path)  {
   suppressPackageStartupMessages(library(hydroGOF))
   prediction <- read.csv( pred_path, row.names = 1 , check.names = F, sep="\t") 
   test_prot  <- read.csv( truth_path, row.names = 1 , check.names = F, sep="\t")
   
-  common_protein <- intersect(rownames(prediction), rownames(test_prot))
+  common_protein <- rownames(read.csv(phosphosites_path, row.names = 1 , check.names = F, sep="\t"))
   prediction <- prediction[common_protein , colnames(test_prot) ]
   test_prot <- test_prot[common_protein , colnames(test_prot)]
  
@@ -247,4 +247,6 @@ NRMSE_by_row_FINAL_ROUND <- function(pred_path, truth_path)  {
   names(nrmse_vec) <- rownames(mat1)
   return(mean(nrmse_vec))
 }
+
+
 
