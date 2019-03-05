@@ -1,1 +1,1 @@
-# NCI-CPTAC-Challenge
+# NCI-CPTAC-Proteogenomics DREAM Challenge
