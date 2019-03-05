@@ -1,0 +1,35 @@
+Tutorial Docker
+
+docker tutorial is also provided here: https://www.synapse.org/#!Synapse:syn2813589/wiki/401460
+
+
+Step 1: create synapse project ID
+require(synapseClient)
+synapseLogin(username="MI_YANG", password="XXXXXXXX", rememberMe=F)
+myProj <- synStore(Project(name="DREAM_DRY_RUN"))
+print(paste('Created a project with Synapse id', myProj$properties$id, sep = ' '))
+"Created a project with Synapse id syn9993328"
+
+Step 2: build docker image
+
+# you can use download this already prepared docker folder here https://drive.google.com/open?id=0B4_6kZHRqWj5NVJRbm1xeE1RU3M
+For now, only sc1 and sc2 are complete
+
+# cd /Users/miyang/Documents/RWTH_Aachen/DREAM_CPTAC/DOCKER_STORAGE/docker_R
+# docker build -t  docker.synapse.org/syn9993328/sc1 ./
+or
+# docker build -t --no-cache docker.synapse.org/syn9993328/sc1 ./
+
+Step 3: push docker to synapse
+
+# docker login docker.synapse.org (not necessary each time)
+# docker push docker.synapse.org/syn9993328/sc1
+
+Step 4: submit to a challenge
+
+# submission: https://www.synapse.org/#!Synapse:syn9993328/docker/
+For instance go to sc1 and click Tools, then Submit to challenge….etc
+
+Internal leaderboard : https://www.synapse.org/#!Synapse:syn8228300/wiki/427404
+
+Check frequently the Output files format: https://www.synapse.org/#!Synapse:syn8228300/wiki/413419
