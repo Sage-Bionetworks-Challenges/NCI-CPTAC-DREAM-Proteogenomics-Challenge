@@ -1,0 +1,10 @@
+name: proteoexplorer
+title:
+username:
+account: heidelberg
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 761322
+bundleId: 1914830
+url: https://heidelberg.shinyapps.io/proteoexplorer/
+when: 1551722388.27921
