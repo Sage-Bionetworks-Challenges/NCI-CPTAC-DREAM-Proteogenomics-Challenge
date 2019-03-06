@@ -16,3 +16,8 @@ Challenge website: https://www.synapse.org/#!Synapse:syn8228304/wiki/413428
 ## Post challenge analysis
 
 **post_challenge_analysis** folder 
+
+
+## Shiny application
+
+**ProteoExplorer** folder 
