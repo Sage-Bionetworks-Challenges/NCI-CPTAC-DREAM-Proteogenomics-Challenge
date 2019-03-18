@@ -1,0 +1,183 @@
+---
+title: "DREAM CPTAC: phosphoprotein abundance prediction"
+author: "MI YANG"
+date: "`r doc_date()`"
+vignette: >
+  %\VignetteIndexEntry{Bioconductor style for HTML documents}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+output: 
+  BiocStyle::html_document
+---
+```{r include=FALSE, cache=FALSE}
+path <- "~/Documents/RWTH_Aachen"
+source(paste0(path,"/FUNCTIONS/general_functions.R", sep=""))
+source(paste0(path,"/FUNCTIONS/PLOT.R", sep=""))
+```
+
+
+## presence of mprot or not, complex in or out:  OVARIAN
+```{r, echo=FALSE, fig.height = 6, fig.width=8}
+
+path1 <- paste0(path,"/DREAM_CPTAC/PROT_PREDICTION/DATA/")
+
+# OVARIAN
+phosphoprot  <- read.delim(paste0(path1,"synapse_retrospective/retrospective_ova_phospho_sort_common_gene_10057.txt"), row.names=1,check.names = F)
+prot <- read.delim(paste0(path1,"synapse_retrospective/retrospective_ova_PNNL_proteome_sort_common_gene_7061.txt"), row.names=1,check.names = F) ; 
+
+############################ ENSEMBLE RESULT ############################
+challenge_result <- paste0(path,"/DREAM_CPTAC/CHALLENGE_RESULT/finalround/ENSEMBLE/")
+pred_phosphoprot_by_prot <- read.delim(paste0(challenge_result,"sc3_ovarian_predictions_ensemble_result.csv") ) ; 
+############################## GUAN RESULT ##############################
+challenge_result <- paste0(path,"/DREAM_CPTAC/CHALLENGE_RESULT/finalround/reguanteamspredictionfiles/")
+pred_phosphoprot_by_prot <- read.delim(paste0(challenge_result,"guan_sc3_ovarian_cor.txt"),  row.names = 1) ; 
+colnames(pred_phosphoprot_by_prot)[1] <- "Correlation"
+
+
+phosphoprot_PROT_name <- vapply(strsplit(rownames(pred_phosphoprot_by_prot), split="[.]"), "[", "", 1)
+
+available_prot <- intersect(rownames(prot), phosphoprot_PROT_name )
+not_available_prot <- phosphoprot_PROT_name[ phosphoprot_PROT_name %not in% available_prot ]
+available_prot <- rownames(pred_phosphoprot_by_prot)[ which(phosphoprot_PROT_name %in% available_prot) ]
+not_available_prot <- rownames(pred_phosphoprot_by_prot)[ which(phosphoprot_PROT_name %in% not_available_prot) ]
+
+phosphoprot_in_cplex_NAME <- read.csv(paste0(path,"/ID_CONVERSION/prot_in_cplex_NAME"),row.names = 1); phosphoprot_in_cplex_NAME <- as.character(phosphoprot_in_cplex_NAME$x)
+
+Complex_IN  <- phosphoprot_PROT_name[ phosphoprot_PROT_name %in% phosphoprot_in_cplex_NAME ] 
+Complex_OUT <- phosphoprot_PROT_name[ phosphoprot_PROT_name %not in% phosphoprot_in_cplex_NAME ]
+Complex_IN <- rownames(pred_phosphoprot_by_prot)[ which(phosphoprot_PROT_name %in% Complex_IN) ]
+Complex_OUT <- rownames(pred_phosphoprot_by_prot)[ which(phosphoprot_PROT_name %in% Complex_OUT) ]
+
+L <- list(pred_phosphoprot_by_prot$Correlation, pred_phosphoprot_by_prot[available_prot, 1],pred_phosphoprot_by_prot[not_available_prot, 1],pred_phosphoprot_by_prot[Complex_IN, 1],pred_phosphoprot_by_prot[Complex_OUT, 1])
+names(L) <- c("All","Prot available","Prot missing","Complex IN","Complex OUT")
+L_ovarian_phosphoprot <- L
+
+nice_boxplot_list_standard <- function (result, title, text_size=20, title_size, Y_label="Prediction performance (r)" ,X_label="features" ) {
+  result_transformed <- c()
+  for (i in 1:length(result)) {
+    v <- na.omit(result[[i]]) ; v <- cbind(rep(i,each=length(na.omit(result[[i]]))), v)
+    result_transformed <- rbind(result_transformed, v)
+    colnames(result_transformed) <- c("features", "correlation")
+  }
+  result_transformed <- data.frame(result_transformed)
+  result_transformed$features <- factor(result_transformed$features,levels=1:length(names(result)), labels=names(result)) 
+  
+  give.n <- function(x){ return(c(y = median(x)*1.1, label = length(x)))  }
+  mean.n <- function(x){ return(c(y = median(x)*0.85, label = round(mean(x),2))) }
+  r <- ggplot(data = result_transformed, aes(y = correlation, x = features, fill = features )) + geom_boxplot(width = 0.35 , colour="black") + 
+    geom_point(stat = "summary", fun.y = "mean", size = I(4), color = I("orange") ) + 
+    stat_summary(fun.data = give.n, geom = "text", fun.y = median, colour = "black",size = 7) +
+    stat_summary(fun.data = mean.n, geom = "text", fun.y = mean, colour = "black",size = 7) + 
+    geom_signif( comparisons = list(c("Prot available","Prot missing")),test = "wilcox.test",y_position=1,color="black",textsize=7  ) + 
+    geom_signif( comparisons = list(c("Complex IN","Complex OUT")),test = "wilcox.test",y_position=1,color="black",textsize=7  ) + 
+    ggtitle(title) + ylab(Y_label) + xlab(X_label) + 
+    theme(legend.position="none",plot.title=element_text(size=text_size+8,hjust=0.5),
+          axis.text=element_text(colour="black",size=text_size),
+          axis.title.x=element_text(colour="black",size=text_size),axis.title.y=element_text(colour="black",size=text_size),
+          panel.background = element_rect(fill='white'),panel.grid.major = element_line(colour = "grey90") )
+  grid.arrange(r, ncol = 1)
+}
+
+result_folder <- paste0(path,"/DREAM_CPTAC/PLOT/finalround/")
+pdf(file=paste0(result_folder,"PHOSPHOPROT_PROT_pred_finalround_HGSC.pdf"), width = 16, height = 10,  compress=TRUE, onefile = F)
+nice_boxplot_list_standard ( L_ovarian_phosphoprot , title=paste("Prediction for ",length(rownames(pred_phosphoprot_by_prot))," phosphoproteins (Ovarian)",sep="" ), text_size= 25, title_size= 1.4)
+dev.off()
+
+```
+
+
+
+## presence of mprot or not, complex in or out:  BREAST
+```{r, echo=FALSE, fig.height = 6, fig.width=8}
+
+phosphoprot <- read.delim(paste0(path1,"synapse_retrospective/retrospective_breast_phospho_sort_common_gene_31981.txt"), row.names=1,check.names = F) ; 
+prot  <- read.delim(paste0(path1,"synapse_retrospective/retrospective_breast_proteome_sort_common_gene_10006.txt"), row.names=1,check.names = F)
+
+############################ ENSEMBLE RESULT ############################
+challenge_result <- paste0(path,"/DREAM_CPTAC/CHALLENGE_RESULT/finalround/ENSEMBLE/")
+pred_phosphoprot_by_prot <- read.delim(paste0(challenge_result,"sc3_breast_predictions_ensemble_result.csv") ) ; 
+############################## GUAN RESULT ##############################
+challenge_result <- paste0(path,"/DREAM_CPTAC/CHALLENGE_RESULT/finalround/reguanteamspredictionfiles/")
+pred_phosphoprot_by_prot <- read.delim(paste0(challenge_result,"guan_sc3_breast_cor.txt"),  row.names = 1) ; 
+colnames(pred_phosphoprot_by_prot)[1] <- "Correlation"
+
+
+phosphoprot_PROT_name <- vapply(strsplit(rownames(pred_phosphoprot_by_prot), split="[.]"), "[", "", 1)
+
+available_prot <- intersect(rownames(prot), phosphoprot_PROT_name )
+not_available_prot <- phosphoprot_PROT_name[ phosphoprot_PROT_name %not in% available_prot ]
+available_prot <- rownames(pred_phosphoprot_by_prot)[ which(phosphoprot_PROT_name %in% available_prot) ]
+not_available_prot <- rownames(pred_phosphoprot_by_prot)[ which(phosphoprot_PROT_name %in% not_available_prot) ]
+
+phosphoprot_in_cplex_NAME <- read.csv(paste0(path,"/ID_CONVERSION/prot_in_cplex_NAME"),row.names = 1); phosphoprot_in_cplex_NAME <- as.character(phosphoprot_in_cplex_NAME$x)
+
+Complex_IN  <- phosphoprot_PROT_name[ phosphoprot_PROT_name %in% phosphoprot_in_cplex_NAME ] 
+Complex_OUT <- phosphoprot_PROT_name[ phosphoprot_PROT_name %not in% phosphoprot_in_cplex_NAME ]
+Complex_IN <- rownames(pred_phosphoprot_by_prot)[ which(phosphoprot_PROT_name %in% Complex_IN) ]
+Complex_OUT <- rownames(pred_phosphoprot_by_prot)[ which(phosphoprot_PROT_name %in% Complex_OUT) ]
+
+L <- list(pred_phosphoprot_by_prot$Correlation, pred_phosphoprot_by_prot[available_prot, 1],pred_phosphoprot_by_prot[not_available_prot, 1],pred_phosphoprot_by_prot[Complex_IN, 1],pred_phosphoprot_by_prot[Complex_OUT, 1])
+names(L) <- c("All","Prot available","Prot missing","Complex IN","Complex OUT")
+L_breast_phosphoprot <- L
+
+result_folder <- paste0(path,"/DREAM_CPTAC/PLOT/finalround/")
+pdf(file=paste0(result_folder,"PHOSPHOPROT_PROT_pred_finalround_breast.pdf"), width = 16, height = 10,  compress=TRUE, onefile = F)
+nice_boxplot_list_standard ( L_breast_phosphoprot , title=paste("Prediction for ",length(rownames(pred_phosphoprot_by_prot))," phosphoproteins (breast)",sep="" ), text_size= 25, title_size= 1.4)
+dev.off()
+
+```
+
+
+## presence of prot or not, complex in or out:  both tissues
+```{r, echo=FALSE, fig.height = 6, fig.width=8}
+
+result <- L_ovarian_phosphoprot
+result_transformed <- c()
+  for (i in 1:length(result)) {
+    v <- na.omit(result[[i]]) ; v <- cbind(rep(i,each=length(na.omit(result[[i]]))), v)
+    result_transformed <- rbind(result_transformed, v)
+    colnames(result_transformed) <- c("features", "correlation")
+  }
+result_transformed <- data.frame(result_transformed)
+result_transformed$features <- factor(result_transformed$features,levels=1:length(names(result)), labels=names(result)) 
+result_transformed_ovarian <- result_transformed
+result_transformed_ovarian$Tissue <- "Ovarian"
+
+result <- L_breast_phosphoprot
+result_transformed <- c()
+  for (i in 1:length(result)) {
+    v <- na.omit(result[[i]]) ; v <- cbind(rep(i,each=length(na.omit(result[[i]]))), v)
+    result_transformed <- rbind(result_transformed, v)
+    colnames(result_transformed) <- c("features", "correlation")
+  }
+result_transformed <- data.frame(result_transformed)
+result_transformed$features <- factor(result_transformed$features,levels=1:length(names(result)), labels=names(result)) 
+result_transformed_breast <- result_transformed
+result_transformed_breast$Tissue <- "Breast"
+
+result_transformed <- rbind(result_transformed_ovarian,result_transformed_breast)
+
+nice_boxplot_list_standard <- function (result_transformed, title, text_size=20, title_size, Y_label="Prediction performance (r)" ,X_label="Subset" ) {
+  r <- ggplot(data = result_transformed, aes(y = correlation, x = features, fill = Tissue )) + geom_boxplot(width = 0.75 , colour="black") + 
+    ggtitle(title) + ylab(Y_label) + xlab(X_label) + 
+    theme(legend.position="bottom",legend.key.size = unit(1.5, "cm"),legend.text = element_text(size = text_size), legend.title = element_text(size = text_size), plot.title=element_text(size=text_size+8,hjust=0.5),
+          axis.text=element_text(colour="black",size=text_size),
+          axis.title.x=element_text(colour="black",size=text_size),axis.title.y=element_text(colour="black",size=text_size),
+          panel.background = element_rect(fill='white'),panel.grid.major = element_line(colour = "grey90") ) + 
+    scale_fill_manual(values=c("#D55E00","#0072B2"))
+  grid.arrange(r, ncol = 1)
+}
+
+
+result_folder <- paste0(path,"/DREAM_CPTAC/PLOT/finalround/")
+pdf(file=paste0(result_folder,"PHOSPHOPROT_PROT_pred_finalround.pdf"), width = 17, height = 11,  compress=TRUE, onefile = F)
+nice_boxplot_list_standard ( result_transformed , title=paste("Influential factors in Phosphoproteomics subchallenge", sep=""), text_size= 33, title_size= 1.4)
+dev.off()
+
+save( L_breast_phosphoprot  , file=paste0(result_folder,"Factor_infuencing_prediction_breast_phosphoprot_GUAN.Rdata") ) 
+save( L_ovarian_phosphoprot , file=paste0(result_folder,"Factor_infuencing_prediction_ovarian_phosphoprot_GUAN.Rdata") ) 
+Factor_infuencing_prediction_GUAN <- result_transformed ; storedata( Factor_infuencing_prediction_GUAN, result_folder )
+
+
+```
+

@@ -1,0 +1,207 @@
+---
+title: "DREAM CPTAC: Protein weight analysis"
+author: "MI YANG"
+date: "`r doc_date()`"
+vignette: >
+  %\VignetteIndexEntry{Bioconductor style for HTML documents}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+output: 
+  BiocStyle::html_document
+---
+```{r include=FALSE, cache=FALSE}
+library(pheatmap)
+path <- "~/Documents/RWTH_Aachen"
+source(paste0(path,"/FUNCTIONS/general_functions.R" ))
+source(paste0(path,"/FUNCTIONS/PLOT.R" ))
+source(paste0(path,"/FUNCTIONS/survival_analysis_functions.R" ))
+source(paste0(path,"/DREAM_CPTAC/PROT_PREDICTION/PROT_ANALYSIS_functions.R" ))
+```
+
+
+
+# PROTEIN WEIGHT ANALYSIS (GUAN METHOD with significance assessment from Francesca)
+
+# For OVARIAN
+
+```{r include=FALSE, cache=FALSE}
+
+Regulators_number_regression_ovarian <- read.csv(paste0(path,"/DREAM_CPTAC/PROT_PREDICTION/DATA_RESULT_STORAGE/COMMON_REGULATORS/Regulators_number_regression_ova.csv"))
+Regulators <- Regulators_number_regression_ovarian$counts
+
+# Kernel Density Plot
+d <- density(Regulators) # returns the density data 
+plot(d) # plots the results
+
+##  1%, 5% and 10%
+##  report survival for different cut-off
+percent_1 <- quantile( Regulators, probs=seq( 0.90, 1 ) )
+top <- as.character( Regulators_number_regression_ovarian[ which(Regulators > as.numeric(percent_1) ) , 1] ) 
+top_regulator <- top
+```
+
+
+# test survival of top predictors (OVARIAN)
+
+```{r include=FALSE, cache=FALSE}
+path2 <- paste0(path,"/DREAM_CPTAC/CHALLENGE_RESULT/")
+path3 <- paste0(path2,"00_PREDICTOR_WEIGHTS/")
+result_folder <- paste0(path,"/DREAM_CPTAC/PLOT/finalround/REGULATORS")
+
+tissue <- "ovarian"
+
+# load data
+version <- "05_version"
+# predicted_protein <- read.delim(paste0(path,"/DREAM_CPTAC/PROT_PREDICTION/DATA_POST_CHALLENGE/TCGA/",tissue,"/mRNA_external/predicted_prot_GUAN.tsv"),row.names = 1,check.names = F )
+# predicted_protein <- predicted_protein[ ,-1]
+mRNA <- read.delim(paste0(path,"/DREAM_CPTAC/PROT_PREDICTION/DATA_POST_CHALLENGE/TCGA/",tissue,"/mRNA_external/prospective_ova_rna_seq_sort_common_gene_15121.txt"), row.names=1, check.names = F )
+mRNA <- mRNA[ ,-1]
+
+########################## functions ###########################
+survival_analysis_continuous = function(CAT, CLINICS){ #  CLINICS=CLINICS_OV
+  library(reshape)
+  library(survminer)
+  status = CLINICS$EVENT
+  stime  = CLINICS$DAYS_TO_LAST_FOLLOWUP
+  var_01 = CLINICS$AGE
+  var_02 = CLINICS$IIIB
+  var_03 = CLINICS$IV
+  var_04 = CLINICS$IIC
+  var_05 = CLINICS$IIIA
+  var_06 = CLINICS$IIB
+  var_07 = CLINICS$IIA
+  var_08 = CLINICS$G1
+  var_09 = CLINICS$G2
+  var_10 = CLINICS$GX  
+  var_11 = CLINICS$G4
+  var_12 = CLINICS$GB
+  
+  RESULTS = list()
+  n.dead.cases = table(status)['1']
+  n.dead.cases[ is.na(n.dead.cases) ] = 1
+
+  if( n.dead.cases > 3 ) {
+    for (predictor in colnames(CAT)){  ##  predictor="RHOH"
+      X = CAT[  , predictor  ]
+      X <- as.numeric(X)  
+      
+      mysurfit2 = coxph(Surv(stime, status) ~ var_01+X)
+      # 
+     
+      X_pval = summary(mysurfit2)$coefficients['X', 'Pr(>|z|)']  #  Cox p-value tests if strata is significantly associated with survival.
+      X_coef = unname(coef(mysurfit2)['X'])
+      RESULTS[[predictor]] = c(predictor= predictor, X_pval = X_pval, 'X_coef' = X_coef ) 
+      # mysurvdiff = survdiff(Surv(stime, status) ~ X) # 
+      X_pval[ is.na(X_pval) ] = 10
+      #  summary( mysurfit2 ) ; basehaz(mysurfit2) predictSurvProb
+      #  put here for 3 levels discretization
+    }
+    RESULTS = lapply(RESULTS, function(x) data.frame(t(data.frame(x, stringsAsFactors = F)), stringsAsFactors = F) )
+    mRESULTS = melt(RESULTS, id.vars = colnames(RESULTS[[1]]) )
+    names(mRESULTS)[ names(mRESULTS) == 'L1' ] = 'predictor'
+    mRESULTS$X_adjpval = p.adjust(mRESULTS$X_pval, method = 'fdr')
+  }
+  mRESULTS <- mRESULTS[ ,c(1,2,5,3)]
+#   fit <- coxph(Surv(stime, status) ~ age+gender+X)
+#   plot(survfit(fit)) 
+  return(mRESULTS)
+}
+
+survival_KM_plot <- function(data,title,size=25) {
+  library(reshape)
+  library(survminer)
+  
+  fit <- survfit( coxph ( Surv(DAYS_TO_LAST_FOLLOWUP, EVENT) ~ strata(Biomarker)+AGE, data = data) )
+  #  +IIIB+IV+IIC+IIIA+IIB+IIA+G1+G2+GX+G4+GB
+  # fit <- survfit( Surv(DAYS_TO_LAST_FOLLOWUP, EVENT) ~ Biomarker, data = data )
+  # http://www.sthda.com/english/wiki/survminer-r-package-survival-data-analysis-and-visualization
+  size <- size
+  ggsurvplot(
+    fit,                  # survfit object with calculated statistics.
+    size=2,               # line size
+    censor.size=8,        # censor point size
+    legend.labs = c("low", "high"),
+    data = data,          # data used to fit survival curves.
+    risk.table = F,       # show risk table.
+    pval = F,             # show p-value of log-rank test.
+    conf.int = F,         # show confidence intervals for 
+    # point estimates of survival curves.
+    # xlim = c(0,5000),   # present narrower X axis, but not affect
+    # survival estimates.
+    xlab = "Time in days",     # customize X axis label.
+    break.time.by = 3000,      # break X axis in time intervals by 500.
+    ggtheme = theme_light(),   # customize plot and risk table with a theme.
+    risk.table.y.text.col = T, # colour risk table text annotations.
+    risk.table.y.text = F,     # show bars instead of names in text annotations
+    title = title,
+    # in legend of risk table
+    font.title=size, font.subtitle=size, font.caption=size, font.x=size, font.y=size, font.tickslab=size, font.legend=size 
+  )  
+}
+
+
+############################################# check mRNA's predictability ############################################
+
+CAT <- t(mRNA[top_regulator,  ])
+CLINICS <- read.csv(paste0(path,"/TCGA/DATA/CLINICS_OV"), row.names=1)
+common <- intersect(rownames(CLINICS),rownames(CAT))
+CAT <- data.frame(CAT) ; CAT <- binarize_by_column(CAT, 0.5, binary = T)
+CLINICS <- read.csv(paste0(path,"/TCGA/DATA/CLINICS_OV"), row.names=1)
+CLINICS <- CLINICS[common, ] ; CAT <- CAT[common, ]
+
+################################### check mRNA's predictability CONTINUOUS VERSION ##################################
+FDR <- 0.15
+
+CAT <- t(mRNA[top_regulator,rownames(CLINICS)])
+CLINICS <- read.csv(paste0(path,"/TCGA/DATA/CLINICS_OV"), row.names=1)
+CLINICS <- CLINICS[common, ] ; CAT <- CAT[common, ]
+
+library(survival)
+table <- survival_analysis_continuous (CAT=CAT, CLINICS=CLINICS ) ; table$X_pval <- as.numeric(table$X_pval) ; table
+mRNA_of_survival <- which(table$X_adjpval < FDR) ;  
+mRNA_of_survival <- table$predictor[mRNA_of_survival]
+table_subset <- table[table$predictor %in% mRNA_of_survival, ] ; length(rownames(table_subset)) ; table_subset$predictor
+
+
+##### plot KM curve
+# table_subset <- table_subset[ order(table_subset$X_adjpval), ]
+# mRNA_of_survival_top_hit <- table_subset$predictor
+# 
+# CAT <- t(mRNA[top_regulator,  ])
+# CAT <- CAT[ ,mRNA_of_survival_top_hit]
+# CAT <- data.frame(CAT) ; CAT <- binarize_by_column(CAT, 0.5, binary = T)
+# CLINICS <- read.csv(paste0(path,"/TCGA/DATA/CLINICS_OV"), row.names=1)
+# CLINICS <- CLINICS[common, ] ; CAT <- CAT[common, ]
+# df <- cbind(CAT, CLINICS)
+# 
+# for(i in mRNA_of_survival_top_hit) {
+#   pdf(file=paste0(result_folder,"/version_significance/mRNA/KM_plot_mRNA_",paste0(i),".pdf"), width = 8 , height = 8, onefile = F )
+#   df_2 <- cbind(df[ ,i], df) ; colnames(df_2)[1] <- "Biomarker" ;
+#   print( survival_KM_plot(data=df_2,  title=paste0(i,"  p=",formatC(table[table$predictor==i, 2], format = "e", digits = 1) ) , size = 32)  )
+#   dev.off()
+# }
+
+## check overall all genes' coefficients.
+CAT_mRNA <- t(mRNA) ; CAT_mRNA <- CAT_mRNA[ rownames(CAT) , colnames(CAT_mRNA) %not in% colnames(CAT)]
+CLINICS <- read.csv(paste0(path,"/TCGA/DATA/CLINICS_OV"), row.names=1)
+CLINICS <- CLINICS[common, ] ; CAT_mRNA <- CAT_mRNA[common, ]
+
+table <- survival_analysis_continuous (CAT=CAT_mRNA, CLINICS=CLINICS ) ; table$X_pval <- as.numeric(table$X_pval) ; table
+mRNA_of_survival <- which(table$X_adjpval < FDR) ;  
+mRNA_of_survival <- table$predictor[mRNA_of_survival]
+table_subset <- table[table$predictor %in% mRNA_of_survival, ] ;  length(rownames(table_subset))
+
+################################### top 10% regulators ###################################
+
+top_hit_common_regulators <- 96
+total_common_regulators   <- length(colnames(CAT))
+top_hit_rest              <- 1336
+total_rest                <- length(colnames(CAT_mRNA))
+
+mat <- cbind(c(top_hit_common_regulators,total_common_regulators-top_hit_common_regulators), c(top_hit_rest,total_rest - top_hit_rest - top_hit_common_regulators)) ; fisher.test(mat)  
+
+
+```
+
+
+
