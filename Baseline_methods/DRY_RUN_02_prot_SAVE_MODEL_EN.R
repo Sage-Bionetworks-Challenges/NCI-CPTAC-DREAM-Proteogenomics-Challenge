@@ -9,6 +9,7 @@ source(paste(path,"/ML_CODE/ML/LIB_METRICS.R", sep=""))
 source(paste(path,"/FUNCTIONS/EN_functions.R", sep=""))
 source(paste(path,"/FUNCTIONS/general_functions.R", sep=""))
 result_folder <- paste(path,"/DREAM_CPTAC/PROT_PREDICTION/DATA_RESULT_STORAGE/", sep="")
+dir.create(result_folder, recursive = T)
 
 ################################################ HGSC ################################################
 ######################################################################################################
