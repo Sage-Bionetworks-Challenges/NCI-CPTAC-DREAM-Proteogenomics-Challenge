@@ -3,7 +3,7 @@
 
 Challenge website: https://www.synapse.org/#!Synapse:syn8228304/wiki/413428
 
-![Alt text](https://github.com/Sage-Bionetworks/NCI-CPTAC-DREAM-Proteogenomics-Challenge/Subchallenges_2_3/blob/master/image/SC_2_3.png)
+![Alt text](https://github.com/Sage-Bionetworks/NCI-CPTAC-DREAM-Proteogenomics-Challenge/tree/master/Subchallenges_2_3/image/SC_2_3.png)
 
 ## Baseline machine learning models used by challenge organizers
 
