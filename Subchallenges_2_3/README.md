@@ -1,4 +1,3 @@
-## NCI-CPTAC-DREAM Proteogenomics Challenge
 ## Assessment of quantitative prediction of the cancer proteome and phosphoproteome
 
 Challenge website: https://www.synapse.org/#!Synapse:syn8228304/wiki/413428
