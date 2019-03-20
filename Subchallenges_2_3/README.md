@@ -1,4 +1,4 @@
-## NCI-CPTAC-Proteogenomics DREAM Challenge
+## NCI-CPTAC-DREAM Proteogenomics Challenge
 ## Assessment of quantitative prediction of the cancer proteome and phosphoproteome
 
 Challenge website: https://www.synapse.org/#!Synapse:syn8228304/wiki/413428
@@ -7,7 +7,7 @@ Challenge website: https://www.synapse.org/#!Synapse:syn8228304/wiki/413428
 
 **Baseline_methods** folder
 
-## Examples of submission of pre-trained models to docker
+## Examples of submission of pre-trained models using docker
 
 **DOCKER_image** folder
 
