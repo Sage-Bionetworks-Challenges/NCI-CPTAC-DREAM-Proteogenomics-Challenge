@@ -10,6 +10,10 @@
 
  * **DOCKER_image** folder
 
+## Collaborative phase
+ 
+ * **collaborative_phase** folder 
+
 ## Post challenge analysis
 
  * **post_challenge_analysis** folder 
