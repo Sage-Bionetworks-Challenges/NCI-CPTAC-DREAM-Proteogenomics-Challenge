@@ -1,0 +1,16 @@
+1. model_ensemble.r
+This is the weighted average of top 4 teams; the weights are based on the leaderboard scores.
+
+
+2. model_ensemble_lb.r
+This is also the weighted average of top 4 teams based on leaderboard scores. However, the prediction of each team was first centered (minus the average and divided by standard deviation) to a reference before stacking. 
+
+3.1 model_ensemble_cv.r
+This is the weighted average of top 4 teams based on the 5-fold cross validation during the community phase. Each team performed 5-fold cross validation only using the training data and the weights were based on the cv results.
+
+3.2 model_ensemble_cv.r
+This is the weighted average of top 4 teams based on the 5-fold cross validation during the community phase. Instead of using a global weight for all genes, we calculated the weight for each gene.
+
+
+
+
