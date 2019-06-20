@@ -12,12 +12,6 @@ We present the first data science competition aiming at predicting protein level
 An in depth analysis revealed associations between the commonly predictive genes and essentiality. We provide all the submitted models to the community for re-use and a web application to explore the result of this challenge to support improved large scale proteogenomic characterization of tumor samples and a better understanding of signaling deregulation.
 
 ## Installation
-For development release:
-```
-pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.python.org/pypi proteo_estimator
-```
-
-For production release:
 ```
 pip install proteo_estimator
 ```
