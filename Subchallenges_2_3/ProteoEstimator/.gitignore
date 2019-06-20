@@ -1,0 +1,14 @@
+# IDE and virtualenv files
+.idea/
+venv/
+
+# package build files
+build/
+*.egg-info/
+dist/
+build_and_publish.sh
+*/__pycache__/
+
+setup.py
+
+tests/output*
