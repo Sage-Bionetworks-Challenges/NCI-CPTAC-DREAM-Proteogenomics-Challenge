@@ -17,6 +17,11 @@ For development release:
 pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.python.org/pypi proteo_estimator
 ```
 
+For production release:
+```
+pip install proteo_estimator
+```
+
 Requires Python3
 ## Usage
 ```python
