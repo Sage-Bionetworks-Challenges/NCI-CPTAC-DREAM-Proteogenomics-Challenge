@@ -18,6 +18,9 @@
 
  * **post_challenge_analysis** folder 
 
+### Python module for protein abundance prediction
+
+ * **ProteoEstimator** folder 
 
 ### Shiny application
 
