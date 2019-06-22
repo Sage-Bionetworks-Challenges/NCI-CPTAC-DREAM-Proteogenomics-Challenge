@@ -22,6 +22,6 @@
 
  * **ProteoEstimator** folder 
 
-### Shiny application
+### Shiny application for challenge result exploration
 
  * **ProteoExplorer** folder 
