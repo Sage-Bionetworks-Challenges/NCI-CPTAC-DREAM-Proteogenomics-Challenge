@@ -1,12 +1,12 @@
 # ProteoEstimator
 
-- [Overview](#Overview)
-- [Installation](#installation)
-- [Usage](#Usage)
-    - [predict_protein_abundances](#predict_protein_abundances)
-    - [predict_phospho](#predict_phospho)
-- [Value](#Value)
-- [Note](#Note)
+* [Overview](#Overview)
+* [Installation](#installation)
+* [Usage](#Usage)
+    * [predict_protein_abundances](#predict_protein_abundances)
+    * [predict_phospho](#predict_phospho)
+* [Value](#Value)
+* [Note](#Note)
 
 ## Overview
 We present the first data science competition aiming at predicting protein levels from copy number and transcript levels, as well as phosphorylation levels from protein levels. The winning models outperform standard baseline machine learning methods and simply using the transcript levels as proxy for protein levels with respect to prediction performance on new patient samples.
