@@ -3,7 +3,8 @@
 - [Overview](#Overview)
 - [Installation](#installation)
 - [Usage](#Usage)
-- [Arguments](#Arguments)
+- [predict_protein_abundances](#predict_protein_abundances)
+- [predict_phospho](#predict_phospho)
 - [Value](#Value)
 - [Note](#Note)
 
@@ -27,21 +28,48 @@ Requires Python3
 import proteo_estimator as pr
 
 # Subchallenge 2: predicting protein levels from copy number and transcript levels
-prediction_file = pr.predict_protein_abundances(
-        tumor,
-        rna,
-        cna,
-        output_dir,
-        logging=True)
+prediction_file_protein = pr.predict_protein_abundances(
+            tumor,
+            rna,
+            cna,
+            output_dir,
+            logging=True)
+            
+# Subchallenge 3: predicting phospho levels from protein abundance and transcript levels
+prediction_file_phospho = pr.predict_phospho(
+            tumor,
+            rna,
+            protein,
+            output_dir,
+            logging=True)
 ```
 
-## Arguments
+## predict_protein_abundances
+
+### Arguments
   
 | Parameter                 | Default       |Type       | Description   |	
 | :------------------------ |:-------------:|:-------------|:-------------|
 | tumor	       |	           |str	          |Tumor type, options are 'breast' and 'ovarian'
 | rna	       |	           |str	          |Absolute file path for rna table. Table must be in TSV format of genes x samples
 | cna	       |	           |str	          |Absolute file path for cna table. Table must be in TSV format of genes x samples
+| output_dir	       |	           |str	          |Absolute file path for output directory. Prediction table and confidence scores will be saved under this directory as prediction.tsv and confidence.tsv
+| logging	       |True	           |bool	          |Print progress to stdout
+
+## Return Value
+| Output                 |Type       | Description   |	
+| :------------------------|:-------------|:-------------|
+| prediction_file	      |str	          |Path to tab-separated file of predicted protein levels in the shape of genes x samples. This file will be saved in the directory passed to the parameter "output_dir" as prediction.tsv
+
+## predict_phospho
+
+### Arguments
+  
+| Parameter                 | Default       |Type       | Description   |	
+| :------------------------ |:-------------:|:-------------|:-------------|
+| tumor	       |	           |str	          |Tumor type, options are 'breast' and 'ovarian'
+| rna	       |	           |str	          |Absolute file path for rna table. Table must be in TSV format of genes x samples
+| protein      |	           |str	          |Absolute file path for cna table. Table must be in TSV format of genes x samples
 | output_dir	       |	           |str	          |Absolute file path for output directory. Prediction table and confidence scores will be saved under this directory as prediction.tsv and confidence.tsv
 | logging	       |True	           |bool	          |Print progress to stdout
 

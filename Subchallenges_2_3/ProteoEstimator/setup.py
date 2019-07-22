@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="proteo_estimator",
-    version="0.0.5",
+    version="1.0.1",
     author="Anna Calinawan",
     author_email="anna.calinawan@mssm.edu",
     description="A package from the NCI-CPTAC DREAM Proteogenomics Challenge",
