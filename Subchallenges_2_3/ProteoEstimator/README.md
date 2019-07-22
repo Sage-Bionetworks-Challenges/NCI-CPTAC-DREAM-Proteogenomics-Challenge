@@ -65,7 +65,7 @@ prediction_file_phospho = pr.predict_phospho(
 | :------------------------ |:-------------:|:-------------|:-------------|
 | tumor	       |	           |str	          |Tumor type, options are 'breast' and 'ovarian'
 | rna	       |	           |str	          |Absolute file path for rna table. Table must be in TSV format of genes x samples
-| protein      |	           |str	          |Absolute file path for cna table. Table must be in TSV format of genes x samples
+| protein      |	           |str	          |Absolute file path for protein abundance table. Table must be in TSV format of genes x samples
 | output_dir	       |	           |str	          |Absolute file path for output directory. Prediction table and confidence scores will be saved under this directory as prediction.tsv and confidence.tsv
 | logging	       |True	           |bool	          |Print progress to stdout
 
