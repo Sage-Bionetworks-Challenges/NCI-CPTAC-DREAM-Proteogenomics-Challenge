@@ -1,4 +1,4 @@
-# proteo_estimator
+# ProteoEstimator
 
 - [Overview](#Overview)
 - [Installation](#installation)
