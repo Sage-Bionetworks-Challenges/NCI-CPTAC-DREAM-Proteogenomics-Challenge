@@ -9,6 +9,4 @@ dist/
 build_and_publish.sh
 */__pycache__/
 
-setup.py
-
 tests/output*
